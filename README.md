@@ -30,6 +30,7 @@ https://www.canva.com/design/DAGiL2HVH34/TpPiZKPbWGLe-oINYRER5g/edit?utm_content
 - Graphic library
 - gcc
 - Figma
+- Aseprite (or Pixilart, Pixelorama, Piskel, LibreSprite)
 
 ## Report
 
