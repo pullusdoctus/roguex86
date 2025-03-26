@@ -1,23 +1,41 @@
 #ifndef DEMO_H
 #define DEMO_H
 
-#include <QMainWindow>
+#include <QWidget>
+#include <QPushButton>
+#include <QLabel>
+#include <QLineEdit>
+#include <QCheckBox>
+#include <QRadioButton>
+#include <QComboBox>
+#include <QProgressBar>
+#include <QSlider>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QMessageBox>
 
-QT_BEGIN_NAMESPACE
-namespace Ui {
-class Demo;
-}
-QT_END_NAMESPACE
-
-class Demo : public QMainWindow
-{
+class Demo : public QWidget {
     Q_OBJECT
 
 public:
-    Demo(QWidget *parent = nullptr);
-    ~Demo();
+    explicit Demo(QWidget *parent = nullptr);
 
 private:
-    Ui::Demo *ui;
+    void setupUI();
+    void setupConnections();
+
+private slots:
+    void showMessage();
+
+private:
+    QLineEdit *inputField;
+    QProgressBar *progressBar;
+    QSlider *slider;
+    QCheckBox *checkBox;
+    QLabel *statusLabel;
+    QPushButton *messageButton;
+    QPushButton *closeButton;
 };
-#endif // DEMO_H
+
+//#include "demo.moc"
+#endif
