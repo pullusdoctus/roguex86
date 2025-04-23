@@ -46,7 +46,7 @@ all: $(TARGET)
 # Create executable
 $(TARGET): $(OBJS)
 	mkdir -p $(BIN_DIR)
-	$(CC) $(CFLAGS) -o $@ $^
+	$(XC) $(CFLAGS) -o $@ $^
 # -----------------------------------------
 
 # Run the executable
