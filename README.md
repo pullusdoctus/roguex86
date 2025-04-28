@@ -39,7 +39,7 @@ https://www.canva.com/design/DAGiL2HVH34/TpPiZKPbWGLe-oINYRER5g/edit?utm_content
 	- [ ] Find menu music (pd)
 - [ ] Design Menu Screens (Options, Volume, Difficulty, Instructions)
 - [ ] Design loading screen (pd)
-- [ ] Design main character, 3 enemies (pd)
+- [X] Design main character, 3 enemies (pd)
 - [ ] Start design of rooms (floor/wall tiles) (YY)
 
 ### YiYhuan
@@ -51,10 +51,10 @@ https://www.canva.com/design/DAGiL2HVH34/TpPiZKPbWGLe-oINYRER5g/edit?utm_content
 - [ ] Difficulty
 
 ### pullusdoctus
-- [ ] Design main character, 3 enemies
+- [X] Design main character, 3 enemies
 - [ ] Design Instructions screen
 - [ ] Design loading screen
-- [ ] Find menu music
+- [X] Find menu music
 - [ ] Options
 - [ ] Volume
 - [ ] Instructions
