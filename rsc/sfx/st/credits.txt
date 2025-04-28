@@ -1,0 +1,5 @@
+all songs downloaded from opengameart.org
+	main-menu.wav: Menu Music (awesomeness.wav) by mrpoly at opengameart.org
+	cave.mp3: Mysterious Ambiance (song21.mp3) from pixelsphere.org, uploaded to opengameart.org by cynicmusic
+	battle.mp3: Battle in the Winter (Battle in the winter.mp3) by Johan Brodd, uploaded to opengameart.org by jobromedia
+	boss-battle.mp3: Boss Battle Theme (Cleyton RX - Battle RPG Theme.mp3) by Cleyton Kauffman (https://soundcloud.com/cleytonkauffman), uploaded to opengameart.org by CleytonKauffman
