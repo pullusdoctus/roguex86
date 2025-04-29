@@ -1,6 +1,18 @@
 #include "menu.h"
 #include <iostream>
 
+void options() {
+    printf("options seleccionado\n");
+}
+
+void new_game() {
+    printf("new gane seleccionado\n");
+}
+
+void exit() {
+    printf("EXIT seleccionado\n");
+}
+
 bool initializeSDL(SDL_Window** window, SDL_Renderer** renderer, const int width, const int height) {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         std::cout << "Error initializing SDL: " << SDL_GetError() << std::endl;
@@ -97,8 +109,26 @@ void showMenu(SDL_Renderer* renderer, TTF_Font* font) {
             if (event.type == SDL_QUIT) {
                 running = false;
             }
+        
             if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) {
                 running = false;
+            }
+        
+            if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
+                int mouseX = event.button.x;
+                int mouseY = event.button.y;
+                
+                SDL_Point mousePoint = { mouseX, mouseY };
+
+                // Check if the click is within the areas of the options
+                if (SDL_PointInRect(&mousePoint, &dstOption1)) {
+                    showOptions(renderer, font);
+                } else if (SDL_PointInRect(&mousePoint, &dstOption2)) {
+                    new_game();
+                } else if (SDL_PointInRect(&mousePoint, &dstOption3)) {
+                    exit();
+                    running = false; // Exiting also closes the menu
+                }
             }
         }
 
@@ -128,4 +158,92 @@ void cleanUp(SDL_Window* window, SDL_Renderer* renderer, TTF_Font* font) {
 
     TTF_Quit();
     SDL_Quit();
+}
+
+void showOptions(SDL_Renderer *renderer, TTF_Font *font)
+{
+    bool inOptions = true;
+    SDL_Event event;
+
+    SDL_Color textColor = {255, 255, 255, 255}; // White color
+
+    // Create the texts to display
+    SDL_Texture* title = renderText("options", font, textColor, renderer);
+    SDL_Texture* option1 = renderText("volume", font, textColor, renderer);
+    SDL_Texture* option2 = renderText("difficulty", font, textColor, renderer);
+    SDL_Texture* option3 = renderText("instructions", font, textColor, renderer);
+    SDL_Texture* back = renderText("back", font, textColor, renderer);
+
+    // Exit if any of them fails
+    if (!title || !option1 || !option2 || !option3 || !back ) return;
+
+    int texW, texH;
+    int windowWidth = 800; // Window width
+    int windowHeight = 600; // Window height
+    
+    // Centered title
+    SDL_QueryTexture(title, nullptr, nullptr, &texW, &texH);
+    SDL_Rect dstTitle = { (windowWidth - texW) / 2, 100, texW, texH };
+
+    // Horizontal options
+    SDL_QueryTexture(option1, nullptr, nullptr, &texW, &texH);
+    int texW1 = texW;
+
+    SDL_QueryTexture(option2, nullptr, nullptr, &texW, &texH);
+    int texW2 = texW;
+
+    SDL_QueryTexture(option3, nullptr, nullptr, &texW, &texH);
+    int texW3 = texW;
+
+    int spacing = 50; // Space between options
+    int startX = (windowWidth - (texW1 + texW2 + texW3 + 2 * spacing)) / 2;
+
+    // Create a back botton
+    int backW, backH;
+    SDL_QueryTexture(back, nullptr, nullptr, &backW, &backH);
+    SDL_Rect dstBack = { 20, 550, backW, backH };  // 20 px del borde, y = 550 pa   
+    SDL_Rect dstOption1 = { startX, 200, texW1, texH };
+    SDL_Rect dstOption2 = { startX + texW1 + spacing, 200, texW2, texH };
+    SDL_Rect dstOption3 = { startX + texW1 + texW2 + 2 * spacing, 200, texW3, texH };
+
+    while (inOptions) {
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_QUIT) {
+                inOptions = false;
+            }
+        
+            if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) {
+                inOptions = false;
+            }
+
+            if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
+                int mouseX = event.button.x;
+                int mouseY = event.button.y;
+                SDL_Point mousePoint = { mouseX, mouseY };
+            
+                if (SDL_PointInRect(&mousePoint, &dstBack)) {
+                    inOptions = false; // Sale del menú de opciones
+                }
+            }
+        }
+
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); // Black background
+        SDL_RenderClear(renderer);
+
+        // Draw each option
+        SDL_RenderCopy(renderer, title, nullptr, &dstTitle);
+        SDL_RenderCopy(renderer, option1, nullptr, &dstOption1);
+        SDL_RenderCopy(renderer, option2, nullptr, &dstOption2);
+        SDL_RenderCopy(renderer, option3, nullptr, &dstOption3);
+        SDL_RenderCopy(renderer, back, nullptr, &dstBack);
+
+        SDL_RenderPresent(renderer);
+    }
+
+    // Free all the textures
+    SDL_DestroyTexture(title);
+    SDL_DestroyTexture(option1);
+    SDL_DestroyTexture(option2);
+    SDL_DestroyTexture(option3);
+    SDL_DestroyTexture(back);
 }

@@ -4,6 +4,11 @@
 #include "SDL.h"
 #include "SDL_ttf.h"
 
+// Function prototypes
+void options();
+void new_game();
+void exit();
+
 // Initializes SDL and TTF, and creates a window and renderer
 bool initializeSDL(SDL_Window** window, SDL_Renderer** renderer, const int width, const int height);
 
@@ -18,5 +23,9 @@ void showMenu(SDL_Renderer* renderer, TTF_Font* font);
 
 // Frees all resources and shuts down SDL
 void cleanUp(SDL_Window* window, SDL_Renderer* renderer, TTF_Font* font);
+
+// Displays the options menu
+void showOptions(SDL_Renderer* renderer, TTF_Font* font);
+
 
 #endif
