@@ -1,30 +1,30 @@
 #include "menu.h"
 #include <iostream>
 
-const int ANCHO_VENTANA = 800;
-const int ALTO_VENTANA = 600;
-const char* RUTA_FUENTE = "assets/fonts/PressStart2P-Regular.ttf";
-const int TAMANO_FUENTE = 24;
+const int WINDOW_WIDTH = 800;
+const int WINDOW_HEIGHT = 600;
+const char* FONT_PATH = "assets/fonts/PressStart2P-Regular.ttf";
+const int FONT_SIZE = 24;
 
 int main(int argc, char* argv[]) {
-    SDL_Window* ventana = nullptr;
-    SDL_Renderer* renderizador = nullptr;
+    SDL_Window* window = nullptr;
+    SDL_Renderer* renderer = nullptr;
 
-    if (!iniciarSDL(&ventana, &renderizador, ANCHO_VENTANA, ALTO_VENTANA)) {
-        std::cout << "Fallo al iniciar SDL.\n";
+    if (!initializeSDL(&window, &renderer, WINDOW_WIDTH, WINDOW_HEIGHT)) {
+        std::cout << "Failed to initialize SDL.\n";
         return 1;
     }
 
-    TTF_Font* fuente = cargarFuente(RUTA_FUENTE, TAMANO_FUENTE);
-    if (!fuente) {
-        std::cout << "Fallo al cargar la fuente.\n";
-        limpiar(ventana, renderizador, nullptr);
+    TTF_Font* font = loadFont(FONT_PATH, FONT_SIZE);
+    if (!font) {
+        std::cout << "Failed to load the font.\n";
+        cleanUp(window, renderer, nullptr);
         return 1;
     }
 
-    mostrarMenu(renderizador, fuente);
+    showMenu(renderer, font);
 
-    limpiar(ventana, renderizador, fuente);
+    cleanUp(window, renderer, font);
 
     return 0;
 }

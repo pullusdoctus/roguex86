@@ -4,19 +4,19 @@
 #include "SDL.h"
 #include "SDL_ttf.h"
 
-// Inicializa SDL y TTF, y crea ventana y renderer
-bool iniciarSDL(SDL_Window** ventana, SDL_Renderer** renderizador, const int ancho, const int alto);
+// Initializes SDL and TTF, and creates a window and renderer
+bool initializeSDL(SDL_Window** window, SDL_Renderer** renderer, const int width, const int height);
 
-// Carga la fuente desde el archivo dado
-TTF_Font* cargarFuente(const char* rutaFuente, int tamano);
+// Loads the font from the given file path
+TTF_Font* loadFont(const char* fontPath, int size);
 
-// Renderiza un texto en pantalla
-SDL_Texture* renderizarTexto(const char* mensaje, TTF_Font* fuente, SDL_Color color, SDL_Renderer* renderizador);
+// Renders text on the screen
+SDL_Texture* renderText(const char* message, TTF_Font* font, SDL_Color color, SDL_Renderer* renderer);
 
-// Muestra el menú principal y maneja eventos
-void mostrarMenu(SDL_Renderer* renderizador, TTF_Font* fuente);
+// Displays the main menu and handles events
+void showMenu(SDL_Renderer* renderer, TTF_Font* font);
 
-// Libera todos los recursos y cierra SDL
-void limpiar(SDL_Window* ventana, SDL_Renderer* renderizador, TTF_Font* fuente);
+// Frees all resources and shuts down SDL
+void cleanUp(SDL_Window* window, SDL_Renderer* renderer, TTF_Font* font);
 
 #endif
