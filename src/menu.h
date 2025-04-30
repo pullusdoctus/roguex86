@@ -39,8 +39,7 @@ void showOptions(SDL_Renderer* renderer, TTF_Font* font);
 // Displays the difficulty menu
 void showDifficulty(SDL_Renderer* renderer, TTF_Font* font);
 
-// TODO: Displays the change volume screen
-void showChangeVolume(SDL_Renderer* renderer, TTF_Font* font);
+void showChangeVolume(SDL_Renderer* renderer, TTF_Font* font, int* currentVolume);
 
 void showInstructions(SDL_Renderer* renderer, TTF_Font* font);
 

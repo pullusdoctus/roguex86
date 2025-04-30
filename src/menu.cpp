@@ -249,7 +249,10 @@ void showOptions(SDL_Renderer *renderer, TTF_Font *font)
 
                 // Check if the click is within the areas of the options
                 if (SDL_PointInRect(&mousePoint, &dstOption1)) {
-                    volume();
+                    // TODO: store game volume
+                    // 100 = current volume
+                    int vol = 100;
+                    showChangeVolume(renderer, font, &vol);
                 } else if (SDL_PointInRect(&mousePoint, &dstOption2)) {
                     showDifficulty(renderer, font);
                 } else if (SDL_PointInRect(&mousePoint, &dstOption3)) {
@@ -375,6 +378,180 @@ void showDifficulty(SDL_Renderer *renderer, TTF_Font *font)
     SDL_DestroyTexture(option1);
     SDL_DestroyTexture(option2);
     SDL_DestroyTexture(option3);
+    SDL_DestroyTexture(back);
+}
+
+void showChangeVolume(SDL_Renderer *renderer, TTF_Font *font, int *currentVolume)
+{
+    bool stay = true;
+    SDL_Event event;
+    bool isDragging = false;
+
+    SDL_Color textColor = {255, 255, 255, 255}; // White color
+
+    // Create the texts to display
+    SDL_Texture* title = renderText("VOLUME", font, textColor, renderer);
+    SDL_Texture* volumeLabel = renderText("Current Volume:", font, textColor, renderer);
+    
+    // Create a dynamic volume indicator
+    char volumeText[20];
+    sprintf(volumeText, "%d%%", *currentVolume);
+    SDL_Texture* volumeValue = renderText(volumeText, font, textColor, renderer);
+    SDL_Texture* back = renderText("back", font, textColor, renderer);
+
+    // Exit if any of them fails
+    if (!title || !volumeLabel || !volumeValue || !back) return;
+
+    int texW, texH;
+    int windowWidth = WINDOW_WIDTH; // Window width
+    
+    // Centered title
+    SDL_QueryTexture(title, nullptr, nullptr, &texW, &texH);
+    SDL_Rect dstTitle = { (windowWidth - texW) / 2, 100, texW, texH };
+    
+    // Volume label
+    SDL_QueryTexture(volumeLabel, nullptr, nullptr, &texW, &texH);
+    SDL_Rect dstVolumeLabel = { (windowWidth - texW) / 2 - 60, dstTitle.y + dstTitle.h + 60, texW, texH };
+    
+    // Volume value
+    SDL_QueryTexture(volumeValue, nullptr, nullptr, &texW, &texH);
+    SDL_Rect dstVolumeValue = { (windowWidth - texW) / 2 + 180, dstVolumeLabel.y, texW, texH };
+
+    // Create a back button
+    int backW, backH;
+    SDL_QueryTexture(back, nullptr, nullptr, &backW, &backH);
+    SDL_Rect dstBack = { 20, 550, backW, backH };
+    
+    // Create slider rectangle
+    int sliderWidth = 300;
+    int sliderHeight = 20;
+    SDL_Rect sliderRect = {
+        (windowWidth - sliderWidth) / 2,
+        dstVolumeLabel.y + dstVolumeLabel.h + 40,
+        sliderWidth,
+        sliderHeight
+    };
+    
+    // Create handle rectangle
+    int handleWidth = 20;
+    int handleHeight = 35;
+    int handleX = sliderRect.x + ((*currentVolume * sliderWidth) / 100) - (handleWidth / 2);
+    SDL_Rect handleRect = { 
+        handleX,
+        sliderRect.y - (handleHeight - sliderHeight) / 2, 
+        handleWidth, 
+        handleHeight 
+    };
+
+    while (stay) {
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_QUIT) {
+                stay = false;
+            }
+        
+            if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) {
+                stay = false;
+            }
+
+            // Handle mouse click
+            if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
+                int mouseX = event.button.x;
+                int mouseY = event.button.y;
+                
+                SDL_Point mousePoint = { mouseX, mouseY };
+
+                // Check if clicking the back button
+                if (SDL_PointInRect(&mousePoint, &dstBack)) {
+                    stay = false; // Exiting closes the menu
+                }
+                
+                // Check if clicking the slider or handle
+                if (SDL_PointInRect(&mousePoint, &handleRect) || SDL_PointInRect(&mousePoint, &sliderRect)) {
+                    isDragging = true;
+                    
+                    // Update volume based on click position
+                    if (mouseX >= sliderRect.x && mouseX <= sliderRect.x + sliderRect.w) {
+                        int newPosition = mouseX - sliderRect.x;
+                        *currentVolume = (newPosition * 100) / sliderWidth;
+                        
+                        // Clamp volume between 0 and 100
+                        if (*currentVolume < 0) *currentVolume = 0;
+                        if (*currentVolume > 100) *currentVolume = 100;
+                        
+                        // Update volume text
+                        SDL_DestroyTexture(volumeValue);
+                        sprintf(volumeText, "%d%%", *currentVolume);
+                        volumeValue = renderText(volumeText, font, textColor, renderer);
+                        SDL_QueryTexture(volumeValue, nullptr, nullptr, &texW, &texH);
+                        dstVolumeValue = { (windowWidth - texW) / 2 + 180, dstVolumeLabel.y, texW, texH };
+                        
+                        // TODO: Apply volume change to game audio here
+                        // For example: Mix_Volume(-1, (*currentVolume * MIX_MAX_VOLUME) / 100);
+                        
+                        // Update handle position
+                        handleRect.x = sliderRect.x + ((*currentVolume * sliderWidth) / 100) - (handleWidth / 2);
+                    }
+                }
+            }
+            
+            // Handle mouse movement while dragging
+            if (event.type == SDL_MOUSEMOTION && isDragging) {
+                int mouseX = event.motion.x;
+                
+                // Update volume based on drag position
+                if (mouseX >= sliderRect.x && mouseX <= sliderRect.x + sliderRect.w) {
+                    int newPosition = mouseX - sliderRect.x;
+                    *currentVolume = (newPosition * 100) / sliderWidth;
+                    
+                    // Clamp volume between 0 and 100
+                    if (*currentVolume < 0) *currentVolume = 0;
+                    if (*currentVolume > 100) *currentVolume = 100;
+                    
+                    // Update volume text
+                    SDL_DestroyTexture(volumeValue);
+                    sprintf(volumeText, "%d%%", *currentVolume);
+                    volumeValue = renderText(volumeText, font, textColor, renderer);
+                    SDL_QueryTexture(volumeValue, nullptr, nullptr, &texW, &texH);
+                    dstVolumeValue = { (windowWidth - texW) / 2 + 180, dstVolumeLabel.y, texW, texH };
+                    
+                    // Apply volume change to game audio here
+                    // For example: Mix_Volume(-1, (*currentVolume * MIX_MAX_VOLUME) / 100);
+                    
+                    // Update handle position
+                    handleRect.x = sliderRect.x + ((*currentVolume * sliderWidth) / 100) - (handleWidth / 2);
+                }
+            }
+            
+            // Handle mouse button release
+            if (event.type == SDL_MOUSEBUTTONUP) {
+                isDragging = false;
+            }
+        }
+
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); // Black background
+        SDL_RenderClear(renderer);
+
+        // Draw all elements
+        SDL_RenderCopy(renderer, title, nullptr, &dstTitle);
+        SDL_RenderCopy(renderer, volumeLabel, nullptr, &dstVolumeLabel);
+        SDL_RenderCopy(renderer, volumeValue, nullptr, &dstVolumeValue);
+        SDL_RenderCopy(renderer, back, nullptr, &dstBack);
+        
+        // Draw slider
+        SDL_SetRenderDrawColor(renderer, textColor.r, textColor.g, textColor.b, textColor.a);
+        SDL_RenderFillRect(renderer, &sliderRect);
+        
+        // Draw handle
+        SDL_SetRenderDrawColor(renderer, textColor.r, textColor.g, textColor.b, textColor.a);
+        SDL_RenderFillRect(renderer, &handleRect);
+
+        SDL_RenderPresent(renderer);
+    }
+
+    // Free all the textures
+    SDL_DestroyTexture(title);
+    SDL_DestroyTexture(volumeLabel);
+    SDL_DestroyTexture(volumeValue);
     SDL_DestroyTexture(back);
 }
 
