@@ -36,14 +36,13 @@ void cleanUp(SDL_Window* window, SDL_Renderer* renderer, TTF_Font* font);
 // Displays the options menu
 void showOptions(SDL_Renderer* renderer, TTF_Font* font);
 
-<<<<<<< HEAD
-//Displays the difficulty menu
+// Displays the difficulty menu
 void showDifficulty(SDL_Renderer* renderer, TTF_Font* font);
 
-=======
-// TODO: Displays the instructions screen
+// TODO: Displays the change volume screen
+void showChangeVolume(SDL_Renderer* renderer, TTF_Font* font);
+
 void showInstructions(SDL_Renderer* renderer, TTF_Font* font);
->>>>>>> d562bea (Move WINDOW_WIDTH and WINDOW_HEIGHT definitions to menu.h)
 
 // Calls the game loading
 void loadingScreen(SDL_Renderer* renderer, TTF_Font* font);

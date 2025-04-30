@@ -253,7 +253,7 @@ void showOptions(SDL_Renderer *renderer, TTF_Font *font)
                 } else if (SDL_PointInRect(&mousePoint, &dstOption2)) {
                     showDifficulty(renderer, font);
                 } else if (SDL_PointInRect(&mousePoint, &dstOption3)) {
-                    instructions();
+                    showInstructions(renderer, font);
                 }
                 else if (SDL_PointInRect(&mousePoint, &dstBack)) {
                     inOptions = false; // Exiting also closes the menu
@@ -301,7 +301,7 @@ void showDifficulty(SDL_Renderer *renderer, TTF_Font *font)
 
     int texW, texH;
     int windowWidth = 800; // Window width
-    int windowHeight = 600; // Window height
+    //int windowHeight = 600; // Window height
     
     // Centered title
     SDL_QueryTexture(title, nullptr, nullptr, &texW, &texH);
@@ -375,5 +375,126 @@ void showDifficulty(SDL_Renderer *renderer, TTF_Font *font)
     SDL_DestroyTexture(option1);
     SDL_DestroyTexture(option2);
     SDL_DestroyTexture(option3);
+    SDL_DestroyTexture(back);
+}
+
+void showInstructions(SDL_Renderer *renderer, TTF_Font *font)
+{
+    bool stay = true;
+    SDL_Event event;
+
+    SDL_Color textColor = {255, 255, 255, 255}; // White color
+
+    // Create the texts to display
+    SDL_Texture* title = renderText("INSTRUCTIONS", font, textColor, renderer);
+    SDL_Texture* explanation1 = renderText("The game has two modes:", font,
+                                          textColor, renderer);
+    SDL_Texture* explanation2 = renderText("exploration and combat", font,
+                                          textColor, renderer);
+    SDL_Texture* explHeader = renderText("Exploration Controls", font,
+                                         textColor,
+                                         renderer);
+    SDL_Texture* expl1 = renderText("WASD: move character", font, textColor,
+                                    renderer);
+    SDL_Texture* combHeader = renderText("Combat Controls", font, textColor,
+                                         renderer);
+    SDL_Texture* comb1 = renderText("WASD: move cursor", font, textColor,
+                                    renderer);
+    SDL_Texture* back = renderText("back", font, textColor, renderer);
+
+    // Exit if any of them fails
+    if (!title || !explanation1 || !explanation2 || !explHeader || !expl1 ||
+        !combHeader || !comb1 || !back ) return;
+
+    int texW, texH;
+    int windowWidth = WINDOW_WIDTH; // Window width
+    //int windowHeight = WINDOW_HEIGHT; // Window height
+    
+    // Centered title
+    SDL_QueryTexture(title, nullptr, nullptr, &texW, &texH);
+    SDL_Rect dstTitle = { (windowWidth - texW) / 2, 100, texW, texH };
+    
+    // Explanation
+    SDL_QueryTexture(explanation1, nullptr, nullptr, &texW, &texH);
+    SDL_Rect dstExplanation1 = { (windowWidth - texW) / 2, dstTitle.y
+        + dstTitle.h + 30, texW, texH };
+    SDL_QueryTexture(explanation2, nullptr, nullptr, &texW, &texH);
+    SDL_Rect dstExplanation2 = { (windowWidth - texW) / 2, dstExplanation1.y
+        + dstExplanation1.h + 15, texW, texH };
+    
+    // Exploration header
+    SDL_QueryTexture(explHeader, nullptr, nullptr, &texW, &texH);
+    SDL_Rect dstExplHeader = { (windowWidth - texW) / 2, dstExplanation2.y
+        + dstExplanation2.h + 30, texW, texH };
+    
+    // Exploration control 1
+    SDL_QueryTexture(expl1, nullptr, nullptr, &texW, &texH);
+    SDL_Rect dstExpl1 = { (windowWidth - texW) / 2, dstExplHeader.y +
+        dstExplHeader.h + 15, texW, texH };
+    
+    // Combat header
+    SDL_QueryTexture(combHeader, nullptr, nullptr, &texW, &texH);
+    SDL_Rect dstCombHeader = { (windowWidth - texW) / 2, dstExpl1.y +
+        dstExpl1.h + 30, texW, texH };
+    
+    // Combat control 1
+    SDL_QueryTexture(comb1, nullptr, nullptr, &texW, &texH);
+    SDL_Rect dstComb1 = { (windowWidth - texW) / 2, dstCombHeader.y +
+        dstCombHeader.h + 15, texW, texH };
+
+    // Create a back button
+    int backW, backH;
+    SDL_QueryTexture(back, nullptr, nullptr, &backW, &backH);
+    SDL_Rect dstBack = { 20, 550, backW, backH };
+
+    while (stay) {
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_QUIT) {
+                stay = false;
+            }
+        
+            if (event.type == SDL_KEYDOWN && event.key.keysym.sym
+                == SDLK_ESCAPE) {
+                stay = false;
+            }
+
+            if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button
+                == SDL_BUTTON_LEFT) {
+                int mouseX = event.button.x;
+                int mouseY = event.button.y;
+                
+                SDL_Point mousePoint = { mouseX, mouseY };
+
+                // Check if the click is within the areas of the options
+               if (SDL_PointInRect(&mousePoint, &dstBack)) {
+                    stay = false; // Exiting closes the menu
+                }
+            }
+        }
+
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); // Black background
+        SDL_RenderClear(renderer);
+
+        // Draw each option
+        SDL_RenderCopy(renderer, title, nullptr, &dstTitle);
+        SDL_RenderCopy(renderer, explanation1, nullptr, &dstExplanation1);
+        SDL_RenderCopy(renderer, explanation2, nullptr, &dstExplanation2);
+        SDL_RenderCopy(renderer, explHeader, nullptr, &dstExplHeader);
+        SDL_RenderCopy(renderer, expl1, nullptr, &dstExpl1);
+        SDL_RenderCopy(renderer, combHeader, nullptr, &dstCombHeader);
+        SDL_RenderCopy(renderer, comb1, nullptr, &dstComb1);
+        SDL_RenderCopy(renderer, back, nullptr, &dstBack);
+
+        SDL_RenderPresent(renderer);
+    }
+
+    // Free all the textures
+    SDL_DestroyTexture(title);
+    SDL_DestroyTexture(explanation1);
+    SDL_DestroyTexture(explanation2);
+    SDL_DestroyTexture(explHeader);
+    SDL_DestroyTexture(expl1);
+    SDL_DestroyTexture(combHeader);
+    SDL_DestroyTexture(comb1);
     SDL_DestroyTexture(back);
 }
