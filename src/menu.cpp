@@ -13,6 +13,31 @@ void exit() {
     printf("EXIT seleccionado\n");
 }
 
+void volume()
+{
+    printf("volume seleccionado\n");
+}
+
+void instructions()
+{
+    printf("instructions seleccionado\n");
+}
+
+void easy()
+{
+    printf("easy seleccionado\n");
+}
+
+void medium()
+{
+    printf("medium seleccionado\n");
+}
+
+void hard()
+{
+    printf("hard seleccionado\n");
+}
+
 bool initializeSDL(SDL_Window** window, SDL_Renderer** renderer, const int width, const int height) {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         std::cout << "Error initializing SDL: " << SDL_GetError() << std::endl;
@@ -219,10 +244,115 @@ void showOptions(SDL_Renderer *renderer, TTF_Font *font)
             if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
                 int mouseX = event.button.x;
                 int mouseY = event.button.y;
+                
+                SDL_Point mousePoint = { mouseX, mouseY };
+
+                // Check if the click is within the areas of the options
+                if (SDL_PointInRect(&mousePoint, &dstOption1)) {
+                    volume();
+                } else if (SDL_PointInRect(&mousePoint, &dstOption2)) {
+                    showDifficulty(renderer, font);
+                } else if (SDL_PointInRect(&mousePoint, &dstOption3)) {
+                    instructions();
+                }
+                else if (SDL_PointInRect(&mousePoint, &dstBack)) {
+                    inOptions = false; // Exiting also closes the menu
+                }
+            }
+        }
+
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); // Black background
+        SDL_RenderClear(renderer);
+
+        // Draw each option
+        SDL_RenderCopy(renderer, title, nullptr, &dstTitle);
+        SDL_RenderCopy(renderer, option1, nullptr, &dstOption1);
+        SDL_RenderCopy(renderer, option2, nullptr, &dstOption2);
+        SDL_RenderCopy(renderer, option3, nullptr, &dstOption3);
+        SDL_RenderCopy(renderer, back, nullptr, &dstBack);
+
+        SDL_RenderPresent(renderer);
+    }
+
+    // Free all the textures
+    SDL_DestroyTexture(title);
+    SDL_DestroyTexture(option1);
+    SDL_DestroyTexture(option2);
+    SDL_DestroyTexture(option3);
+    SDL_DestroyTexture(back);
+}
+
+void showDifficulty(SDL_Renderer *renderer, TTF_Font *font)
+{
+    bool inDifficulty = true;
+    SDL_Event event;
+
+    SDL_Color textColor = {255, 255, 255, 255}; // White color
+
+    // Create the texts to display
+    SDL_Texture* title = renderText("difficulty", font, textColor, renderer);
+    SDL_Texture* option1 = renderText("easy", font, textColor, renderer);
+    SDL_Texture* option2 = renderText("medium", font, textColor, renderer);
+    SDL_Texture* option3 = renderText("hard", font, textColor, renderer);
+    SDL_Texture* back = renderText("back", font, textColor, renderer);
+
+    // Exit if any of them fails
+    if (!title || !option1 || !option2 || !option3 || !back ) return;
+
+    int texW, texH;
+    int windowWidth = 800; // Window width
+    int windowHeight = 600; // Window height
+    
+    // Centered title
+    SDL_QueryTexture(title, nullptr, nullptr, &texW, &texH);
+    SDL_Rect dstTitle = { (windowWidth - texW) / 2, 100, texW, texH };
+
+    // Horizontal options
+    SDL_QueryTexture(option1, nullptr, nullptr, &texW, &texH);
+    int texW1 = texW;
+
+    SDL_QueryTexture(option2, nullptr, nullptr, &texW, &texH);
+    int texW2 = texW;
+
+    SDL_QueryTexture(option3, nullptr, nullptr, &texW, &texH);
+    int texW3 = texW;
+
+    int spacing = 50; // Space between options
+    int startX = (windowWidth - (texW1 + texW2 + texW3 + 2 * spacing)) / 2;
+
+    // Create a back botton
+    int backW, backH;
+    SDL_QueryTexture(back, nullptr, nullptr, &backW, &backH);
+    SDL_Rect dstBack = { 20, 550, backW, backH };  // 20 px del borde
+
+    SDL_Rect dstOption1 = { startX, 200, texW1, texH };
+    SDL_Rect dstOption2 = { startX + texW1 + spacing, 200, texW2, texH };
+    SDL_Rect dstOption3 = { startX + texW1 + texW2 + 2 * spacing, 200, texW3, texH };
+
+    while (inDifficulty) {
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_QUIT) {
+                inDifficulty = false;
+            }
+        
+            if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) {
+                inDifficulty = false;
+            }
+
+            if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
+                int mouseX = event.button.x;
+                int mouseY = event.button.y;
                 SDL_Point mousePoint = { mouseX, mouseY };
             
-                if (SDL_PointInRect(&mousePoint, &dstBack)) {
-                    inOptions = false; // Sale del menú de opciones
+                if (SDL_PointInRect(&mousePoint, &dstOption1)) {
+                    easy();
+                } else if (SDL_PointInRect(&mousePoint, &dstOption2)) {
+                    medium();
+                } else if (SDL_PointInRect(&mousePoint, &dstOption3)) {
+                    hard();
+                }
+                else if (SDL_PointInRect(&mousePoint, &dstBack)) {
+                    inDifficulty = false; // Exiting also closes the menu
                 }
             }
         }

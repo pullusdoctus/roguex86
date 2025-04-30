@@ -8,6 +8,11 @@
 void options();
 void new_game();
 void exit();
+void volume();
+void instructions();
+void easy();
+void medium();
+void hard();
 
 // Initializes SDL and TTF, and creates a window and renderer
 bool initializeSDL(SDL_Window** window, SDL_Renderer** renderer, const int width, const int height);
@@ -26,6 +31,9 @@ void cleanUp(SDL_Window* window, SDL_Renderer* renderer, TTF_Font* font);
 
 // Displays the options menu
 void showOptions(SDL_Renderer* renderer, TTF_Font* font);
+
+//Displays the difficulty menu
+void showDifficulty(SDL_Renderer* renderer, TTF_Font* font);
 
 
 #endif
