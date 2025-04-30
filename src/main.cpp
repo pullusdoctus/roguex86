@@ -1,12 +1,10 @@
 #include "menu.h"
 #include <iostream>
 
-const int WINDOW_WIDTH = 800;
-const int WINDOW_HEIGHT = 600;
 const char* FONT_PATH = "assets/fonts/PressStart2P-Regular.ttf";
 const int FONT_SIZE = 24;
 
-int main(int argc, char* argv[]) {
+int main() {
     SDL_Window* window = nullptr;
     SDL_Renderer* renderer = nullptr;
 

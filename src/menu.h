@@ -1,8 +1,12 @@
 #ifndef MENU_H
 #define MENU_H
 
-#include "SDL.h"
-#include "SDL_ttf.h"
+#include <SDL.h>
+#include <SDL_ttf.h>
+
+// Needed definitions
+#define WINDOW_WIDTH 800
+#define WINDOW_HEIGHT 600
 
 // Function prototypes
 void options();
@@ -32,8 +36,16 @@ void cleanUp(SDL_Window* window, SDL_Renderer* renderer, TTF_Font* font);
 // Displays the options menu
 void showOptions(SDL_Renderer* renderer, TTF_Font* font);
 
+<<<<<<< HEAD
 //Displays the difficulty menu
 void showDifficulty(SDL_Renderer* renderer, TTF_Font* font);
 
+=======
+// TODO: Displays the instructions screen
+void showInstructions(SDL_Renderer* renderer, TTF_Font* font);
+>>>>>>> d562bea (Move WINDOW_WIDTH and WINDOW_HEIGHT definitions to menu.h)
+
+// Calls the game loading
+void loadingScreen(SDL_Renderer* renderer, TTF_Font* font);
 
 #endif

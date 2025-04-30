@@ -105,8 +105,8 @@ void showMenu(SDL_Renderer* renderer, TTF_Font* font) {
     if (!title || !option1 || !option2 || !option3) return;
 
     int texW, texH;
-    int windowWidth = 800; // Window width
-    int windowHeight = 600; // Window height
+    int windowWidth = WINDOW_WIDTH; // Window width
+    //int windowHeight = WINDOW_HEIGHT; // Window height
     
     // Centered title
     SDL_QueryTexture(title, nullptr, nullptr, &texW, &texH);
@@ -203,8 +203,8 @@ void showOptions(SDL_Renderer *renderer, TTF_Font *font)
     if (!title || !option1 || !option2 || !option3 || !back ) return;
 
     int texW, texH;
-    int windowWidth = 800; // Window width
-    int windowHeight = 600; // Window height
+    int windowWidth = WINDOW_WIDTH; // Window width
+    //int windowHeight = WINDOW_HEIGHT; // Window height
     
     // Centered title
     SDL_QueryTexture(title, nullptr, nullptr, &texW, &texH);
@@ -223,7 +223,7 @@ void showOptions(SDL_Renderer *renderer, TTF_Font *font)
     int spacing = 50; // Space between options
     int startX = (windowWidth - (texW1 + texW2 + texW3 + 2 * spacing)) / 2;
 
-    // Create a back botton
+    // Create a back button
     int backW, backH;
     SDL_QueryTexture(back, nullptr, nullptr, &backW, &backH);
     SDL_Rect dstBack = { 20, 550, backW, backH };  // 20 px del borde, y = 550 pa   
