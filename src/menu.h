@@ -1,5 +1,4 @@
-#ifndef MENU_H
-#define MENU_H
+#pragma once
 
 #include <SDL.h>
 #include <SDL_ttf.h>
@@ -12,8 +11,6 @@
 void options();
 void new_game();
 void exit();
-void volume();
-void instructions();
 void easy();
 void medium();
 void hard();
@@ -39,11 +36,11 @@ void showOptions(SDL_Renderer* renderer, TTF_Font* font);
 // Displays the difficulty menu
 void showDifficulty(SDL_Renderer* renderer, TTF_Font* font);
 
+// Displays the change volume screen
 void showChangeVolume(SDL_Renderer* renderer, TTF_Font* font, int* currentVolume);
 
+// Displays the instructions screen
 void showInstructions(SDL_Renderer* renderer, TTF_Font* font);
 
 // Calls the game loading
 void loadingScreen(SDL_Renderer* renderer, TTF_Font* font);
-
-#endif

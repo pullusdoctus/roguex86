@@ -13,16 +13,6 @@ void exit() {
     printf("EXIT seleccionado\n");
 }
 
-void volume()
-{
-    printf("volume seleccionado\n");
-}
-
-void instructions()
-{
-    printf("instructions seleccionado\n");
-}
-
 void easy()
 {
     printf("easy seleccionado\n");
