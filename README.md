@@ -24,29 +24,29 @@ https://www.canva.com/design/DAGiL2HVH34/TpPiZKPbWGLe-oINYRER5g/edit?utm_content
 ## TODO
 
 ### Iter2
-- [ ] Implement menu (YY)
+- [X] Implement menu (YY)
 	- [ ] Click New Game > Loads (YY)
-	- [ ] Click Options > Goes to Options Screen (pd)
-		- [ ] Click Volume > Goes to Volume Screen (pd)
+	- [X] Click Options > Goes to Options Screen (pd)
+		- [X] Click Volume > Goes to Volume Screen (pd)
 			- [ ] Volume Slider
-			- [ ] Click Back > Return to previous screen (YY)
-		- [ ] Click Difficulty > Goes to Difficulty Screen (YY)
+			- [X] Click Back > Return to previous screen (YY)
+		- [X] Click Difficulty > Goes to Difficulty Screen (YY)
 			- [ ] Click a difficulty > Difficulty Changes
-			- [ ] Click Back > Return to previous screen
-		- [ ] Click Instructions > Goes to Instructions Screen (pd)
-			- [ ] Click Back > Return to previous screen
-		- [ ] Click Back > Return to previous screen (YY)
-	- [ ] Find menu music (pd)
+			- [X] Click Back > Return to previous screen
+		- [X] Click Instructions > Goes to Instructions Screen (pd)
+			- [X] Click Back > Return to previous screen
+		- [X] Click Back > Return to previous screen (YY)
+	- [X] Find menu music (pd)
 - [ ] Design Menu Screens (Options, Volume, Difficulty, Instructions)
 - [ ] Design loading screen (pd)
 - [X] Design main character, 3 enemies (pd)
-- [ ] Start design of rooms (floor/wall tiles) (YY)
+- [X] Start design of rooms (floor/wall tiles) (YY)
 
 ### YiYhuan
-- [ ] Start design of rooms (floor/wall tiles)
-- [ ] Design Options, Volume, Difficulty screen
-- [ ] Load Menu on startup
-- [ ] Back
+- [X] Start design of rooms (floor/wall tiles)
+- [X] Design Options, Volume, Difficulty screen
+- [X] Load Menu on startup
+- [X] Back
 - [ ] New Game
 - [ ] Difficulty
 
@@ -55,9 +55,9 @@ https://www.canva.com/design/DAGiL2HVH34/TpPiZKPbWGLe-oINYRER5g/edit?utm_content
 - [ ] Design Instructions screen
 - [ ] Design loading screen
 - [X] Find menu music
-- [ ] Options
+- [X] Options
 - [ ] Volume
-- [ ] Instructions
+- [X] Instructions
 
 ### Future
 - [ ] Design controls: WASD/Arrows
