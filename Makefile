@@ -15,12 +15,14 @@ TARGET		:= $(BIN_DIR)/roguex86
 
 # Compilers and flags
 # -----------------------------------------
-CC			:= gcc
-XC			:= g++
-CFLAGS	:= -Wall -Wextra -g -I$(LIB_DIR)
-XCFLAGS	:= $(CFLAGS)
-AS			:= nasm
-ASFLAGS	:= -f elf64
+CC				:= gcc
+XC				:= g++
+SDLFLAGS	:= $(shell sdl2-config --cflags)
+CFLAGS		:= -Wall -Wextra -g -I$(LIB_DIR) $(SDLFLAGS)
+XCFLAGS		:= $(CFLAGS)
+AS				:= nasm
+ASFLAGS		:= -f elf64
+SDL_LIBS		:= $(shell sdl2-config --libs) -lSDL2_ttf
 # -----------------------------------------
 
 # File variables
@@ -46,7 +48,7 @@ all: $(TARGET)
 # Create executable
 $(TARGET): $(OBJS)
 	mkdir -p $(BIN_DIR)
-	$(XC) $(CFLAGS) -o $@ $^
+	$(XC) $(CFLAGS) -o $@ $^ $(SDL_LIBS)
 # -----------------------------------------
 
 # Run the executable
