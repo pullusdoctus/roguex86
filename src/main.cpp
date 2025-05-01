@@ -1,7 +1,7 @@
 #include "menu.h"
 #include <iostream>
 
-const char* FONT_PATH = "assets/fonts/PressStart2P-Regular.ttf";
+const char* FONT_PATH = "./rsc/assets/fonts/PressStart2P-Regular.ttf";
 const int FONT_SIZE = 24;
 
 int main() {
