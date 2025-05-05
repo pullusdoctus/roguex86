@@ -5,7 +5,7 @@
 # Directories
 SRC_DIR		:= src
 ASM_DIR		:= $(SRC_DIR)/asm
-LIB_DIR		:= lib
+INC_DIR		:= inc
 RSC_DIR		:= rsc
 BUILD_DIR	:= build
 BIN_DIR		:= bin
