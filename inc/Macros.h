@@ -18,7 +18,8 @@
 // Tile and room definitions
 #define TILE_SIZE 64
 #define MIN_ROOM_SIZE 5
-#define MAX_ROOM_SIZE 15
+#define MAX_ROOM_HEIGHT 11
+#define MAX_ROOM_WIDTH 19
 #define WALL_TILE "./rsc/img/tiles/wall_tile.png"
 #define FLOOR_TILE "./rsc/img/tiles/floor_tile.png"
 

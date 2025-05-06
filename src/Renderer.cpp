@@ -98,15 +98,32 @@ void Renderer::renderGame(Room* currentRoom, Player* player) {
   SDL_SetRenderDrawColor(this->renderer, 0, 0, 0, 255);
   SDL_RenderClear(this->renderer);
   // Render the room and player
-  currentRoom->render(this->renderer, player);
-  // Present the rendered frame
-  SDL_RenderPresent(this->renderer);
+  this->renderRoom(currentRoom, player);
 }
 
-// TODO: update once Player exists
 void Renderer::renderRoom(Room* room, Player* player) {
-  (void)room;
-  this->renderPlayer(player, 0, 0);
+  // Calculate room position in the window
+  SDL_Point roomPos = room->calculateRoomPosition();
+  // Draw room tiles
+  for (int y = 0; y < room->getHeight(); ++y) {
+    for (int x = 0; x < room->getWidth(); ++x) {
+      SDL_Rect destRect = {
+        roomPos.x + x * TILE_SIZE,
+        roomPos.y + y * TILE_SIZE,
+        TILE_SIZE,
+        TILE_SIZE
+      };
+      // Draw the appropriate texture based on tile type
+      if (room->getTileAt(x, y) == FLOOR) {
+        SDL_RenderCopy(this->renderer, room->getFloor(), NULL, &destRect);
+      } else {
+        SDL_RenderCopy(this->renderer, room->getWall(), NULL, &destRect);
+      }
+    }
+  }
+  this->renderPlayer(player, roomPos.x, roomPos.y);
+  // Present the rendered frame
+  SDL_RenderPresent(this->renderer);
 }
 
 void Renderer::renderPlayer(Player* player, int offsetX, int offsetY) {

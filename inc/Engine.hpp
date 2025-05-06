@@ -36,6 +36,12 @@ class Engine {
     GameState gameState;
     Difficulty difficulty;
     int volume;  // TODO: move to AudioMixer
+    int remainingLevels;
+    bool newGame;
+
+    void runGame(bool& quit);
+    void gameOver(bool& quit);
+    void victory(bool& quit);
 
     void handleMainMenuInput(bool& quit);
     void handleOptionsMenuInput();
@@ -43,7 +49,6 @@ class Engine {
     void calculateVolumeFromSliderPosition(int x);
     void handleDifficultyMenuInput();
     void handleInstructionsMenuInput();
-
     void handleInGame(bool& quit);
 
     void generateRooms();
@@ -51,6 +56,7 @@ class Engine {
 
     bool readSettings();
     void writeSettings() const;
+    void updateDifficulty(Difficulty difficulty);
 
   public:
     Engine();

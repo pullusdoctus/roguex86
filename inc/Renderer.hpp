@@ -47,15 +47,14 @@ class Renderer {
     // Frees all resources and shuts down SDL
     void clean();
 
+    SDL_Renderer* getSDLRenderer() { return this->renderer; }
+
     void loadFonts();
     // Loads the font from the given file path
     TTF_Font* loadFont(const char* fontPath, const int size);
     // Renders text on a texture
     SDL_Texture* renderText(const char* message, int font, SDL_Color color);
 
-    void renderGame(Room* currentRoom, Player* player);
-    void renderRoom(Room* room, Player* player);
-    void renderPlayer(Player* player, int offsetX, int offsetY);
 
     // Displays the main menu
     void showMainMenu();
@@ -69,7 +68,9 @@ class Renderer {
     void showInstructions();
     // TODO: draws the loading screen
     void showLoadingScreen();
-    // TODO: draw game/room
+    void renderGame(Room* currentRoom, Player* player);
+    void renderRoom(Room* room, Player* player);
+    void renderPlayer(Player* player, int offsetX, int offsetY);
     // TODO: draw the pause menu when prompted in-game
     void showPauseMenu();
 

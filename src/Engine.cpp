@@ -7,7 +7,7 @@
 #include <Macros.h>
 #include <random>
 
-Engine::Engine() {
+Engine::Engine() : newGame(true) {
   this->renderer = new Renderer;
   this->inputHandler = new InputHandler;
   this->currentFloor = new Level;
@@ -15,6 +15,17 @@ Engine::Engine() {
   if (!readSettings()) {
     this->difficulty = MEDIUM;
     this->volume = 50;
+  }
+  switch (this->difficulty) {
+    case EASY:
+      this->remainingLevels = 3;
+      break;
+    case MEDIUM:
+      this->remainingLevels = 5;
+      break;
+    case HARD:
+      this->remainingLevels = 7;
+      break;
   }
 }
 
@@ -58,12 +69,8 @@ int Engine::run() {
         this->handleInstructionsMenuInput();
         break;
       case IN_GAME:
-        {
-          Room currentRoom = this->currentFloor->getCurrentRoom();
-          this->renderer->renderGame(&currentRoom, this->player);
-          this->handleInGame(quit);
-          break;
-        }
+        this->runGame(quit);
+        break;
       case COMBAT:
         // TODO: Implement combat rendering and handling
         std::cout << "Combat started" << std::endl;
@@ -73,19 +80,40 @@ int Engine::run() {
         std::cout << "Pause pressed" << std::endl;
         break;
       case GAME_OVER:
-        // TODO:show defeat screen
+        this->gameOver(quit);
         std::cout << "Game Over" << std::endl;
-        quit = true;
         break;
       case VICTORY:
-        // TODO:show victory screen
+        this->victory(quit);
         std::cout << "Victory" << std::endl;
-        quit = true;
         break;
     }
   }
   writeSettings();
   return EXIT_SUCCESS;
+}
+
+void Engine::runGame(bool& quit) {
+  this->generateRooms();
+  Room currentRoom = this->currentFloor->getCurrentRoom();
+  if (newGame) {
+    this->renderer->renderGame(&currentRoom, this->player);
+    this->newGame = false;
+  }
+  while (this->gameState == IN_GAME && !quit) {
+    this->renderer->renderRoom(&currentRoom, this->player);
+    this->handleInGame(quit);
+  }
+}
+
+void Engine::gameOver(bool& quit) {
+  // TODO: show defeat screen
+  quit = true;
+}
+
+void Engine::victory(bool& quit) {
+  // TODO:show victory screen
+  quit = true;
 }
 
 void Engine::handleMainMenuInput(bool& quit) {
@@ -188,8 +216,6 @@ void Engine::calculateVolumeFromSliderPosition(int x) {
   // Ensure volume is within valid range (0-100)
   if (this->volume < 0) this->volume = 0;
   if (this->volume > 100) this->volume = 100;
-  // TODO: Update actual audio volume through audio system
-  std::cout << "Volume set to: " << this->volume << "%" << std::endl;
 }
 
 void Engine::handleDifficultyMenuInput() {
@@ -200,16 +226,16 @@ void Engine::handleDifficultyMenuInput() {
     SDL_Point mouse = this->inputHandler->getMousePosition();
     // Check if user clicked on Easy
     if (this->inputHandler->isPointInEasyButton(mouse, this->renderer)) {
-      this->difficulty = EASY;
+      this->updateDifficulty(EASY);
     }
     // Check if user clicked on Medium
     else if (this->inputHandler->isPointInMediumButton(mouse,
                                                        this->renderer)) {
-      this->difficulty = MEDIUM;
+      this->updateDifficulty(MEDIUM);
     }
     // Check if user clicked on Hard
     else if (this->inputHandler->isPointInHardButton(mouse, this->renderer)) {
-      this->difficulty = HARD;
+      this->updateDifficulty(HARD);
     }
     // Check if user clicked on Back
     else if (this->inputHandler->isPointInBackButton(mouse, this->renderer)) {
@@ -232,28 +258,33 @@ void Engine::handleInstructionsMenuInput() {
 }
 
 void Engine::handleInGame(bool& quit) {
-  quit = true;
+  if (this->inputHandler->keyPressed(ESC)) {
+    // TODO: open pause menu
+    quit = true;
+    return;
+  }
+  // TODO: handle movement
 }
 
 void Engine::generateRooms() {
   // Generate at least 3 rooms, and at most 6
-  std::mt19937 rng;
+  std::mt19937 rng(std::random_device{}());
   std::uniform_int_distribution<int> dist(MIN_ROOM_COUNT, MAX_ROOM_COUNT);
   this->currentFloor->setRoomCount(dist(rng));
   for (int room = 0; room < this->currentFloor->getRoomCount(); ++room) {
-    Room newRoom;
-    this->currentFloor->addRoom(&newRoom);
+    Room* newRoom = new Room;
+    newRoom->generate(this->renderer->getSDLRenderer());
+    this->currentFloor->addRoom(newRoom);
   }
 }
 
-void placePlayerInRoom(bool edge, int side) {
+void Engine::placePlayerInRoom(bool edge, int side) {
   // TODO: handle room change
   (void) edge;
   (void) side;
-  // TODO: uncomment once Player exists
-  // Level currentRoom = this->currentFloor->getRoom(this->currentFloor->currentRoom);
-  // this->player->x = currentRoom->getWidth / 2;
-  // this->player->y = currentRoom->getHeight / 2;
+  Room currentRoom = this->currentFloor->getCurrentRoom();
+  this->player->x = currentRoom.getWidth() / 2;
+  this->player->y = currentRoom.getHeight() / 2;
 }
 
 bool Engine::readSettings() {
@@ -281,4 +312,19 @@ void Engine::writeSettings() const {
              sizeof(this->difficulty));
   data.write(reinterpret_cast<const char*>(&this->volume),
              sizeof(this->volume));
+}
+
+void Engine::updateDifficulty(Difficulty difficulty) {
+  this->difficulty = difficulty;
+  switch (difficulty) {
+    case EASY:
+      this->remainingLevels = 3;
+      break;
+    case MEDIUM:
+      this->remainingLevels = 5;
+      break;
+    case HARD:
+      this->remainingLevels = 7;
+      break;
+  }
 }
