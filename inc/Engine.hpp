@@ -3,6 +3,10 @@
 #include <InputHandler.hpp>
 #include <Renderer.hpp>
 
+#define DATA_DIR "./data/"
+#define DATA_FILENAME "data.bin"
+#define DATA_PATH DATA_DIR DATA_FILENAME
+
 enum GameState {
   MAIN_MENU,
   OPTIONS_MENU,
@@ -50,4 +54,6 @@ class Engine {
     ~Engine();
 
     int run();
+    bool readSettings();
+    void writeSettings() const;
 };

@@ -1,13 +1,16 @@
 #include <Engine.hpp>
 
+#include <fstream>
 #include <iostream>
 
 Engine::Engine() {
   this->renderer = new Renderer;
   this->inputHandler = new InputHandler;
   this->gameState = MAIN_MENU;
-  this->difficulty = MEDIUM;
-  this->volume = 100;
+  if (!readSettings()) {
+    this->difficulty = MEDIUM;
+    this->volume = 50;
+  }
 }
 
 Engine::~Engine() {
@@ -67,7 +70,31 @@ int Engine::run() {
         break;
     }
   }
+  writeSettings();
   return EXIT_SUCCESS;
+}
+
+bool Engine::readSettings() {
+ std::ifstream data(DATA_PATH, std::ios::binary);
+  if (!data) {
+    return false; // File does not exist or couldn't be opened
+  }
+  data.read(reinterpret_cast<char*>(&this->difficulty),
+            sizeof(this->difficulty));
+  data.read(reinterpret_cast<char*>(&this->volume),
+            sizeof(this->volume));
+  return data.good();
+}
+
+void Engine::writeSettings() const {
+  std::ofstream data(DATA_PATH, std::ios::binary);
+  if (!data) {
+    throw std::runtime_error("Failed to open file for writing.");
+  }
+  data.write(reinterpret_cast<const char*>(&this->difficulty),
+             sizeof(this->difficulty));
+  data.write(reinterpret_cast<const char*>(&this->volume),
+             sizeof(this->volume));
 }
 
 void Engine::handleMainMenuInput(bool& quit) {
