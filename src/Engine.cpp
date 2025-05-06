@@ -1,5 +1,6 @@
 #include <Engine.hpp>
 
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 
@@ -87,6 +88,10 @@ bool Engine::readSettings() {
 }
 
 void Engine::writeSettings() const {
+  std::filesystem::path dirPath = std::filesystem::path(DATA_DIR);
+  if (!std::filesystem::exists(dirPath)) {
+    std::filesystem::create_directories(dirPath);
+  }
   std::ofstream data(DATA_PATH, std::ios::binary);
   if (!data) {
     throw std::runtime_error("Failed to open file for writing.");
