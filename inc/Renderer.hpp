@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Room.hpp>
+
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <string>
@@ -68,11 +70,15 @@ class Renderer {
     // Frees all resources and shuts down SDL
     void clean();
 
+    void loadFonts();
     // Loads the font from the given file path
     TTF_Font* loadFont(const char* fontPath, const int size);
-    void loadFonts();
     // Renders text on a texture
     SDL_Texture* renderText(const char* message, int font, SDL_Color color);
+
+    void renderGame();
+    void renderRoom(Room& room/*, Player& player*/);
+    void renderPlayer();
 
     // Displays the main menu
     void showMainMenu();

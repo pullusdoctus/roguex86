@@ -1,11 +1,15 @@
 #pragma once
 
 #include <InputHandler.hpp>
+#include <Level.hpp>
 #include <Renderer.hpp>
 
 #define DATA_DIR "./data/"
 #define DATA_FILENAME "data.bin"
 #define DATA_PATH DATA_DIR DATA_FILENAME
+
+#define MIN_ROOM_COUNT 3
+#define MAX_ROOM_COUNT 6
 
 enum GameState {
   MAIN_MENU,
@@ -34,26 +38,29 @@ class Engine {
     // Player* player;
     // vector<Enemy*> enemies;
     // const int enemyTypeCount;
+    Level* currentFloor;
     GameState gameState;
     Difficulty difficulty;
     int volume;  // TODO: move to AudioMixer
 
     void handleMainMenuInput(bool& quit);
     void handleOptionsMenuInput();
-    void handleDifficultyMenuInput();
     void handleVolumeMenuInput();
+    void calculateVolumeFromSliderPosition(int x);
+    void handleDifficultyMenuInput();
     void handleInstructionsMenuInput();
 
-    void calculateVolumeFromSliderPosition(int x);
-    // TODO:
-    // void updateGameState();
-    // void movePlayer();
-    void handleCollisions();
+    void handleInGame();
+
+    void generateRooms();
+    void placePlayerInRoom(bool edge, int side);
+
+    bool readSettings();
+    void writeSettings() const;
+
   public:
     Engine();
     ~Engine();
 
     int run();
-    bool readSettings();
-    void writeSettings() const;
 };

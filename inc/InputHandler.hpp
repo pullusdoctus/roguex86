@@ -5,6 +5,10 @@
 
 // Key Scancodes
 #define ESC SDL_SCANCODE_ESCAPE
+#define W_KEY SDL_SCANCODE_W
+#define S_KEY SDL_SCANCODE_S
+#define A_KEY SDL_SCANCODE_A
+#define D_KEY SDL_SCANCODE_D
 
 class InputHandler {
   private:

@@ -7,6 +7,7 @@
 Engine::Engine() {
   this->renderer = new Renderer;
   this->inputHandler = new InputHandler;
+  this->currentFloor = new Level;
   this->gameState = MAIN_MENU;
   if (!readSettings()) {
     this->difficulty = MEDIUM;
@@ -17,6 +18,7 @@ Engine::Engine() {
 Engine::~Engine() {
   delete this->renderer;
   delete this->inputHandler;
+  delete this->currentFloor;
 }
 
 int Engine::run() {
@@ -53,7 +55,8 @@ int Engine::run() {
         this->handleInstructionsMenuInput();
         break;
       case IN_GAME:
-        // TODO: Implement in-game rendering and handling
+        this->renderer->renderGame();
+        this->handleInGame();
         break;
       case COMBAT:
         // TODO: Implement combat rendering and handling
@@ -73,33 +76,6 @@ int Engine::run() {
   }
   writeSettings();
   return EXIT_SUCCESS;
-}
-
-bool Engine::readSettings() {
- std::ifstream data(DATA_PATH, std::ios::binary);
-  if (!data) {
-    return false; // File does not exist or couldn't be opened
-  }
-  data.read(reinterpret_cast<char*>(&this->difficulty),
-            sizeof(this->difficulty));
-  data.read(reinterpret_cast<char*>(&this->volume),
-            sizeof(this->volume));
-  return data.good();
-}
-
-void Engine::writeSettings() const {
-  std::filesystem::path dirPath = std::filesystem::path(DATA_DIR);
-  if (!std::filesystem::exists(dirPath)) {
-    std::filesystem::create_directories(dirPath);
-  }
-  std::ofstream data(DATA_PATH, std::ios::binary);
-  if (!data) {
-    throw std::runtime_error("Failed to open file for writing.");
-  }
-  data.write(reinterpret_cast<const char*>(&this->difficulty),
-             sizeof(this->difficulty));
-  data.write(reinterpret_cast<const char*>(&this->volume),
-             sizeof(this->volume));
 }
 
 void Engine::handleMainMenuInput(bool& quit) {
@@ -182,6 +158,30 @@ void Engine::handleVolumeMenuInput() {
   }
 }
 
+// TODO: update volume in AudioMixer
+void Engine::calculateVolumeFromSliderPosition(int x) {
+  // Get the slider bounds from the renderer
+  const SDL_Rect& sliderBounds =
+    this->renderer->getMenuItemBounds(MENU_ITEM_VOL_SLIDER);
+  // Calculate volume percentage based on x position relative to slider
+  if (x <= sliderBounds.x) {
+    // If clicked at or before the start of the slider, set volume to 0
+    this->volume = 0;
+  } else if (x >= sliderBounds.x + sliderBounds.w) {
+    // If clicked at or after the end of the slider, set volume to 100
+    this->volume = 100;
+  } else {
+    // Calculate percentage based on position within slider
+    int sliderPosition = x - sliderBounds.x;
+    this->volume = (sliderPosition * 100) / sliderBounds.w;
+  }
+  // Ensure volume is within valid range (0-100)
+  if (this->volume < 0) this->volume = 0;
+  if (this->volume > 100) this->volume = 100;
+  // TODO: Update actual audio volume through audio system
+  std::cout << "Volume set to: " << this->volume << "%" << std::endl;
+}
+
 void Engine::handleDifficultyMenuInput() {
   if (this->inputHandler->keyPressed(ESC)) {
     this->gameState = OPTIONS_MENU;
@@ -221,26 +221,49 @@ void Engine::handleInstructionsMenuInput() {
   }
 }
 
-// TODO: update volume in AudioMixer
-void Engine::calculateVolumeFromSliderPosition(int x) {
-  // Get the slider bounds from the renderer
-  const SDL_Rect& sliderBounds =
-    this->renderer->getMenuItemBounds(MENU_ITEM_VOL_SLIDER);
-  // Calculate volume percentage based on x position relative to slider
-  if (x <= sliderBounds.x) {
-    // If clicked at or before the start of the slider, set volume to 0
-    this->volume = 0;
-  } else if (x >= sliderBounds.x + sliderBounds.w) {
-    // If clicked at or after the end of the slider, set volume to 100
-    this->volume = 100;
-  } else {
-    // Calculate percentage based on position within slider
-    int sliderPosition = x - sliderBounds.x;
-    this->volume = (sliderPosition * 100) / sliderBounds.w;
+void Engine::generateRooms() {
+  // Generate at least 3 rooms, and at most 6
+  std::uniform_int_distribution<int> dist(MIN_ROOM_COUNT, MAX_ROOM_COUNT);
+  this->currentFloor->setRoomCount(dist(rng));
+  for (int room = 0; room < this->currentFloor->getRoomCount(); ++room) {
+    Room newRoom;
+    this->currentFloor->addRoom(&newRoom);
   }
-  // Ensure volume is within valid range (0-100)
-  if (this->volume < 0) this->volume = 0;
-  if (this->volume > 100) this->volume = 100;
-  // TODO: Update actual audio volume through audio system
-  std::cout << "Volume set to: " << this->volume << "%" << std::endl;
+}
+
+void placePlayerInRoom(bool edge, int side) {
+  // TODO: handle room change
+  (void) edge;
+  (void) side;
+  // TODO: uncomment once Player exists
+  // Level currentRoom = this->currentFloor->getRoom(this->currentFloor->currentRoom);
+  // this->player->x = currentRoom->getWidth / 2;
+  // this->player->y = currentRoom->getHeight / 2;
+}
+
+bool Engine::readSettings() {
+ std::ifstream data(DATA_PATH, std::ios::binary);
+  if (!data) {
+    return false; // File does not exist or couldn't be opened
+  }
+  data.read(reinterpret_cast<char*>(&this->difficulty),
+            sizeof(this->difficulty));
+  data.read(reinterpret_cast<char*>(&this->volume),
+            sizeof(this->volume));
+  return data.good();
+}
+
+void Engine::writeSettings() const {
+  std::filesystem::path dirPath = std::filesystem::path(DATA_DIR);
+  if (!std::filesystem::exists(dirPath)) {
+    std::filesystem::create_directories(dirPath);
+  }
+  std::ofstream data(DATA_PATH, std::ios::binary);
+  if (!data) {
+    throw std::runtime_error("Failed to open file for writing.");
+  }
+  data.write(reinterpret_cast<const char*>(&this->difficulty),
+             sizeof(this->difficulty));
+  data.write(reinterpret_cast<const char*>(&this->volume),
+             sizeof(this->volume));
 }

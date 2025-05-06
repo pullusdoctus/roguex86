@@ -91,6 +91,31 @@ SDL_Texture* Renderer::renderText(const char* message, int font,
   return texture;
 }
 
+void Renderer::renderGame() {
+  // Clear the screen
+  SDL_SetRenderDrawColor(renderer->getRenderer(), 0, 0, 0, 255);
+  SDL_RenderClear(renderer->getRenderer());
+  // Render the room and player
+  currentRoom->render(renderer->getRenderer(), player);
+  // Present the rendered frame
+  SDL_RenderPresent(renderer->getRenderer());
+}
+
+// TODO: update once Player exists
+void Renderer::renderRoom(Room& room/*, Player& player*/) {
+}
+
+void Renderer::renderRoom(/*Player& player*/) {
+  this->renderPlayer();
+  SDL_Rect destRect = {
+    offsetX + x * TILE_SIZE,
+    offsetY + y * TILE_SIZE,
+    TILE_SIZE,
+    TILE_SIZE
+  };
+  SDL_RenderCopy(renderer, texture, NULL, &destRect);
+}
+
 void Renderer::showMainMenu() {
   SDL_Color textColor = {255, 255, 255, 255}; // White color
   // Create the texts to display
