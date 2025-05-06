@@ -24,7 +24,7 @@
 #define MENU_BACK_X 100
 #define MENU_BACK_Y 600
 #define MENU_VOL_Y 350
-#define MENU_LCOL_X 300
+#define MENU_LCOL_X 200
 #define MENU_RCOL_X 800
 #define MENU_INST_OFFSET 50
 #define MENU_INST_SUBT 300
