@@ -41,7 +41,7 @@ int Engine::run() {
         this->handleVolumeMenuInput();
         break;
       case DIFFICULTY_MENU:
-        this->renderer->showDifficulty();
+        this->renderer->showDifficulty(this->difficulty);
         this->handleDifficultyMenuInput();
         break;
       case INSTRUCTIONS_MENU:
@@ -88,7 +88,6 @@ void Engine::handleMainMenuInput(bool& quit) {
     }
     // Check if user clicked on Exit
     else if (this->inputHandler->isPointInExitButton(mouse, this->renderer)) {
-      std::cout << "Exit selected" << std::endl;
       quit = true;
     }
   }
@@ -160,18 +159,15 @@ void Engine::handleDifficultyMenuInput() {
     // Check if user clicked on Easy
     if (this->inputHandler->isPointInEasyButton(mouse, this->renderer)) {
       this->difficulty = EASY;
-      std::cout << "Easy difficulty selected" << std::endl;
     }
     // Check if user clicked on Medium
     else if (this->inputHandler->isPointInMediumButton(mouse,
                                                        this->renderer)) {
       this->difficulty = MEDIUM;
-      std::cout << "Medium difficulty selected" << std::endl;
     }
     // Check if user clicked on Hard
     else if (this->inputHandler->isPointInHardButton(mouse, this->renderer)) {
       this->difficulty = HARD;
-      std::cout << "Hard difficulty selected" << std::endl;
     }
     // Check if user clicked on Back
     else if (this->inputHandler->isPointInBackButton(mouse, this->renderer)) {

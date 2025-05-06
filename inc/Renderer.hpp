@@ -81,7 +81,7 @@ class Renderer {
     // Displays the change volume screen
     void showChangeVolume(int currentVolume);
     // Displays the difficulty menu
-    void showDifficulty();
+    void showDifficulty(int currentDifficulty);
     // Displays the instructions screen
     void showInstructions();
     // TODO: draws the loading screen

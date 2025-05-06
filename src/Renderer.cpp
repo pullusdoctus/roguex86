@@ -253,13 +253,24 @@ void Renderer::showChangeVolume(int currentVolume) {
   SDL_DestroyTexture(back);
 }
 
-void Renderer::showDifficulty() {
+void Renderer::showDifficulty(int currentDifficulty) {
   SDL_Color textColor = {255, 255, 255, 255}; // White color
+  // Yellow color for highlighting
+  SDL_Color highlightColor = {255, 255, 0, 255};
   // Create the texts to display
-  SDL_Texture* title = this->renderText("Difficulty", MAIN_MENU_FONT, textColor);
-  SDL_Texture* option1 = this->renderText("easy", MAIN_MENU_FONT, textColor);
-  SDL_Texture* option2 = this->renderText("medium", MAIN_MENU_FONT, textColor);
-  SDL_Texture* option3 = this->renderText("hard", MAIN_MENU_FONT, textColor);
+  SDL_Texture* title = this->renderText("Difficulty", MAIN_MENU_FONT,
+                                        textColor);
+  // Render the appropriately colored difficulty texts
+  SDL_Texture* option1 = this->renderText("easy", MAIN_MENU_FONT,
+                                          (currentDifficulty == 0) ?
+                                          highlightColor : textColor);
+  SDL_Texture* option2 = this->renderText("medium", MAIN_MENU_FONT,
+                                          (currentDifficulty == 1) ?
+                                          highlightColor : textColor);
+  SDL_Texture* option3 = this->renderText("hard", MAIN_MENU_FONT,
+                                          (currentDifficulty == 2) ?
+                                          highlightColor : textColor);
+  // Render the back button
   SDL_Texture* option4 = this->renderText("back", MAIN_MENU_FONT, textColor);
   // Exit if any of them fails
   if (!title || !option1 || !option2 || !option3 || !option4) return;
