@@ -22,7 +22,7 @@ CFLAGS		:= -Wall -Wextra -g -I$(INC_DIR) $(SDLFLAGS)
 XCFLAGS		:= $(CFLAGS)
 AS				:= nasm
 ASFLAGS		:= -f elf64
-SDL_LIBS		:= $(shell sdl2-config --libs) -lSDL2_ttf
+SDL_LIBS		:= $(shell sdl2-config --libs) -lSDL2_ttf -lSDL2_image
 # -----------------------------------------
 
 # File variables
