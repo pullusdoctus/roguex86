@@ -3,46 +3,74 @@
 InputHandler::InputHandler() {
   // Initialize all keys as not pressed
   for (int i = 0; i < SDL_NUM_SCANCODES; i++) {
-    keysDown[i] = false;
+    this->keysDown[i] = false;
+    this->prevKeysDown[i] = false;
   }
+  this->leftMBDown = false;
+  this->prevLeftMBDown = false;
 }
 
 InputHandler::~InputHandler() {
 }
 
 void InputHandler::update() {
+  // Store previous keyboard state
+  for (int i = 0; i < SDL_NUM_SCANCODES; i++) {
+    this->prevKeysDown[i] = this->keysDown[i];
+  }
+  // Store previous left MB state
+  this->prevLeftMBDown = this->leftMBDown;
   // Update key states from keyboard state
   const Uint8* keyboardState = SDL_GetKeyboardState(NULL);
   for (int i = 0; i < SDL_NUM_SCANCODES; i++) {
-    keysDown[i] = keyboardState[i];
+    this->keysDown[i] = keyboardState[i];
   }
+  // Update left MB state
+  int mouseX, mouseY;
+  Uint32 mouseState = SDL_GetMouseState(&mouseX, &mouseY);
+  this->leftMBDown = (mouseState & SDL_BUTTON(1));
 }
 
 bool InputHandler::quitRequested() {
   // Check if window close button was pressed
-  return (event.type == SDL_QUIT);
+  return (this->event.type == SDL_QUIT);
 }
 
 bool InputHandler::processEvents() {
   bool quitRequested = false;
   // Process all pending events
-  while (SDL_PollEvent(&event)) {
+  while (SDL_PollEvent(&this->event)) {
     // Check for quit events
-    if (event.type == SDL_QUIT) {
+    if (this->event.type == SDL_QUIT) {
       quitRequested = true;
     }
   }
+  this->update();
   return quitRequested;
 }
 
 bool InputHandler::keyDown(SDL_Scancode key) {
-  return keysDown[key];
+  return this->keysDown[key];
+}
+
+bool InputHandler::keyPressed(SDL_Scancode key) {
+  return this->keysDown[key] && !this->prevKeysDown[key];
+}
+
+bool InputHandler::keyReleased(SDL_Scancode key) {
+  return !this->keysDown[key] && this->prevKeysDown[key];
+}
+
+bool InputHandler::mouseDown() {
+  return this->leftMBDown;
 }
 
 bool InputHandler::mouseClicked() {
-  // Check if left mouse button was clicked
-  return (event.type == SDL_MOUSEBUTTONDOWN
-  && event.button.button == SDL_BUTTON_LEFT);
+  return this->leftMBDown && !this->prevLeftMBDown;
+}
+
+bool InputHandler::mouseReleased() {
+  return !this->leftMBDown && this->prevLeftMBDown;
 }
 
 SDL_Point InputHandler::getMousePosition() {

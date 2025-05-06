@@ -10,18 +10,26 @@ class InputHandler {
   private:
     SDL_Event event;
     bool keysDown[SDL_NUM_SCANCODES];
+    bool prevKeysDown[SDL_NUM_SCANCODES];
+    bool leftMBDown;
+    bool prevLeftMBDown;
 
   public:
     InputHandler();
     ~InputHandler();
 
+    bool listen();
     void update();
     bool quitRequested();
     bool processEvents();
 
     bool keyDown(SDL_Scancode key);
+    bool keyPressed(SDL_Scancode key);
+    bool keyReleased(SDL_Scancode key);
 
+    bool mouseDown();
     bool mouseClicked();
+    bool mouseReleased();
     SDL_Point getMousePosition();
 
     bool isPointInOptionsButton(SDL_Point& mouse, Renderer* renderer);

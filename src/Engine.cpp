@@ -71,6 +71,9 @@ int Engine::run() {
 }
 
 void Engine::handleMainMenuInput(bool& quit) {
+  if (this->inputHandler->keyPressed(ESC)) {
+    quit = true;
+  }
   SDL_Point mouse = this->inputHandler->getMousePosition();
   if (this->inputHandler->mouseClicked()) {
     // Check if user clicked on Options
@@ -92,7 +95,7 @@ void Engine::handleMainMenuInput(bool& quit) {
 }
 
 void Engine::handleOptionsMenuInput() {
-  if (this->inputHandler->keyDown(ESC)) {
+  if (this->inputHandler->keyPressed(ESC)) {
     this->gameState = MAIN_MENU;
   }
   SDL_Point mouse = this->inputHandler->getMousePosition();
@@ -119,12 +122,12 @@ void Engine::handleOptionsMenuInput() {
 }
 
 void Engine::handleVolumeMenuInput() {
-  static bool isDragging = false;
-  if (this->inputHandler->keyDown(ESC)) {
+  if (this->inputHandler->keyPressed(ESC)) {
     this->gameState = OPTIONS_MENU;
   }
+  static bool isDragging = false;
+  SDL_Point mouse = this->inputHandler->getMousePosition();
   if (this->inputHandler->mouseClicked()) {
-    SDL_Point mouse = this->inputHandler->getMousePosition();
     // Check if user clicked on Back
     if (this->inputHandler->isPointInBackButton(mouse, this->renderer)) {
       this->gameState = OPTIONS_MENU;
@@ -136,23 +139,20 @@ void Engine::handleVolumeMenuInput() {
       this->calculateVolumeFromSliderPosition(mouse.x);
     }
   }
-  // Get current mouse state
-  int mouseX, mouseY;
-  Uint32 mouseState = SDL_GetMouseState(&mouseX, &mouseY);
-  // Handle mouse movement while dragging
-  if (isDragging && (mouseState & SDL_BUTTON(1))) {
-    if (this->inputHandler->isXPositionInSlider(mouseX, this->renderer)) {
-      this->calculateVolumeFromSliderPosition(mouseX);
-    }
-  }
-  // Handle mouse button release
-  if (!(mouseState & SDL_BUTTON(1))) {
+  // End dragging when mouse button is released
+  if (this->inputHandler->mouseReleased()) {
     isDragging = false;
+  }
+  // Update volume while dragging
+  if (isDragging && this->inputHandler->mouseDown()) {
+    if (this->inputHandler->isXPositionInSlider(mouse.x, this->renderer)) {
+      this->calculateVolumeFromSliderPosition(mouse.x);
+    }
   }
 }
 
 void Engine::handleDifficultyMenuInput() {
-  if (this->inputHandler->keyDown(ESC)) {
+  if (this->inputHandler->keyPressed(ESC)) {
     this->gameState = OPTIONS_MENU;
   }
   if (this->inputHandler->mouseClicked()) {
@@ -181,7 +181,7 @@ void Engine::handleDifficultyMenuInput() {
 }
 
 void Engine::handleInstructionsMenuInput() {
-  if (this->inputHandler->keyDown(ESC)) {
+  if (this->inputHandler->keyPressed(ESC)) {
     this->gameState = OPTIONS_MENU;
   }
   if (this->inputHandler->mouseClicked()) {
