@@ -1,8 +1,11 @@
 #include <Engine.hpp>
 
+#include <chrono>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <Macros.h>
+#include <random>
 
 Engine::Engine() {
   this->renderer = new Renderer;
@@ -55,21 +58,28 @@ int Engine::run() {
         this->handleInstructionsMenuInput();
         break;
       case IN_GAME:
-        this->renderer->renderGame();
-        this->handleInGame();
-        break;
+        {
+          Room currentRoom = this->currentFloor->getCurrentRoom();
+          this->renderer->renderGame(&currentRoom, this->player);
+          this->handleInGame(quit);
+          break;
+        }
       case COMBAT:
         // TODO: Implement combat rendering and handling
+        std::cout << "Combat started" << std::endl;
         break;
       case PAUSE:
         // TODO: Implement pause menu rendering and handling
+        std::cout << "Pause pressed" << std::endl;
         break;
       case GAME_OVER:
         // TODO:show defeat screen
+        std::cout << "Game Over" << std::endl;
         quit = true;
         break;
       case VICTORY:
         // TODO:show victory screen
+        std::cout << "Victory" << std::endl;
         quit = true;
         break;
     }
@@ -221,8 +231,13 @@ void Engine::handleInstructionsMenuInput() {
   }
 }
 
+void Engine::handleInGame(bool& quit) {
+  quit = true;
+}
+
 void Engine::generateRooms() {
   // Generate at least 3 rooms, and at most 6
+  std::mt19937 rng;
   std::uniform_int_distribution<int> dist(MIN_ROOM_COUNT, MAX_ROOM_COUNT);
   this->currentFloor->setRoomCount(dist(rng));
   for (int room = 0; room < this->currentFloor->getRoomCount(); ++room) {

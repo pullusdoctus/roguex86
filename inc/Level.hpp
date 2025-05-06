@@ -13,7 +13,8 @@ class Level {
     ~Level();
 
     Room getRoom(int room);
-    void addRoom(Room& room);
+    Room getCurrentRoom();
+    void addRoom(Room* room);
 
     void setRoomCount(int newRoomCount);
     int getRoomCount();

@@ -1,35 +1,12 @@
 #pragma once
 
+#include <Player.hpp>
 #include <Room.hpp>
 
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <string>
 #include <vector>
-
-// Needed definitions
-#define WINDOW_WIDTH 1280
-#define WINDOW_HEIGHT 720
-#define FONT_PATH "./rsc/assets/fonts/PressStart2P-Regular.ttf"
-#define MENU_BG_PATH "./rsc/img/menu-bg.png"  // TODO: render
-#define FONT_SIZE_MAIN_MENU 24
-#define FONT_SIZE_SUBTITLE 20
-#define FONT_SIZE_INSTRUCTION 18
-#define FONT_SIZE_PAUSE_MENU 12
-
-// Main Menu button coordinates
-#define MENU_TITLE_Y 100
-#define MENU_LEFT_X 200
-#define MENU_MIDDLE_X 540
-#define MENU_RIGHT_X 900
-#define MENU_MIDDLE_Y 400
-#define MENU_BACK_X 100
-#define MENU_BACK_Y 600
-#define MENU_VOL_Y 350
-#define MENU_LCOL_X 200
-#define MENU_RCOL_X 800
-#define MENU_INST_OFFSET 50
-#define MENU_INST_SUBT 300
 
 enum MainMenuButtonID {
   MENU_ITEM_OPTIONS = 0,
@@ -76,9 +53,9 @@ class Renderer {
     // Renders text on a texture
     SDL_Texture* renderText(const char* message, int font, SDL_Color color);
 
-    void renderGame();
-    void renderRoom(Room& room/*, Player& player*/);
-    void renderPlayer();
+    void renderGame(Room* currentRoom, Player* player);
+    void renderRoom(Room* room, Player* player);
+    void renderPlayer(Player* player, int offsetX, int offsetY);
 
     // Displays the main menu
     void showMainMenu();

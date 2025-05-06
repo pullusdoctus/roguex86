@@ -1,58 +1,30 @@
 #include <Room.hpp>
-#include <Renderer.hpp>
+
+#include <chrono>
 #include <SDL_image.h>
 #include <iostream>
+#include <Macros.h>
 #include <random>
-#include <chrono>
 
-// Player implementation
-Player::Player(SDL_Renderer* renderer) : x(0), y(0), texture(nullptr) {
-  // Load player texture
-  SDL_Surface* surface = IMG_Load("./rsc/img/sprites/player.png");
-  if (surface) {
-    texture = SDL_CreateTextureFromSurface(renderer, surface);
-    SDL_FreeSurface(surface);
-  } else {
-    std::cerr << "Failed to load player texture: " << SDL_GetError() << std::endl;
-  }
-}
-
-Player::~Player() {
-  if (texture) {
-    SDL_DestroyTexture(texture);
-  }
-}
-
-void Player::render(SDL_Renderer* renderer, int offsetX, int offsetY) {
-  SDL_Rect destRect = {
-    offsetX + x * TILE_SIZE,
-    offsetY + y * TILE_SIZE,
-    TILE_SIZE,
-    TILE_SIZE
-  };
-  SDL_RenderCopy(renderer, texture, NULL, &destRect);
-}
-
-Room::Room(SDL_Renderer* renderer) 
-    : width(0), height(0), floorTexture(nullptr), wallTexture(nullptr) {
-    // Seed the random number generator with current time
-    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-    rng.seed(seed);
+Room::Room()
+    : width(0), height(0), floorTile(nullptr), wallTile(nullptr) {
     // Initialize the room
-    generate(renderer);
+    // generate(renderer);
 }
 
 Room::~Room() {
-  if (floorTexture) {
-    SDL_DestroyTexture(floorTexture);
+  if (this->floorTile) {
+    SDL_DestroyTexture(this->floorTile);
   }
-  if (wallTexture) {
-    SDL_DestroyTexture(wallTexture);
+  if (this->wallTile) {
+    SDL_DestroyTexture(this->wallTile);
   }
 }
 
 void Room::generateDimensions() {
   // Generate random width and height between MIN_ROOM_SIZE and MAX_ROOM_SIZE
+  // unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+  std::mt19937 rng;
   std::uniform_int_distribution<int> dist(MIN_ROOM_SIZE, MAX_ROOM_SIZE);
   this->width = dist(rng);
   this->height = dist(rng);
@@ -79,7 +51,7 @@ bool Room::loadTextures(SDL_Renderer* renderer) {
     std::cerr << "Failed to load floor texture: " << SDL_GetError() << std::endl;
     return false;
   }
-  floorTexture = SDL_CreateTextureFromSurface(renderer, floorSurface);
+  this->floorTile = SDL_CreateTextureFromSurface(renderer, floorSurface);
   SDL_FreeSurface(floorSurface);
   // Load wall texture
   SDL_Surface* wallSurface = IMG_Load("./rsc/img/tiles/wall_tile.png");
@@ -87,9 +59,9 @@ bool Room::loadTextures(SDL_Renderer* renderer) {
     std::cerr << "Failed to load wall texture: " << SDL_GetError() << std::endl;
     return false;
   }
-  wallTexture = SDL_CreateTextureFromSurface(renderer, wallSurface);
+  this->wallTile = SDL_CreateTextureFromSurface(renderer, wallSurface);
   SDL_FreeSurface(wallSurface);
-  return floorTexture && wallTexture;
+  return this->floorTile && this->wallTile;
 }
 
 void Room::generate(SDL_Renderer* renderer) {
@@ -131,9 +103,9 @@ void Room::render(SDL_Renderer* renderer, Player* player) {
       };
       // Draw the appropriate texture based on tile type
       if (tiles[y][x] == FLOOR) {
-        SDL_RenderCopy(renderer, floorTexture, NULL, &destRect);
+        SDL_RenderCopy(renderer, this->floorTile, NULL, &destRect);
       } else {
-        SDL_RenderCopy(renderer, wallTexture, NULL, &destRect);
+        SDL_RenderCopy(renderer, this->wallTile, NULL, &destRect);
       }
     }
   }

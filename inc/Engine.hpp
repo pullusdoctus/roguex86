@@ -2,14 +2,8 @@
 
 #include <InputHandler.hpp>
 #include <Level.hpp>
+#include <Player.hpp>
 #include <Renderer.hpp>
-
-#define DATA_DIR "./data/"
-#define DATA_FILENAME "data.bin"
-#define DATA_PATH DATA_DIR DATA_FILENAME
-
-#define MIN_ROOM_COUNT 3
-#define MAX_ROOM_COUNT 6
 
 enum GameState {
   MAIN_MENU,
@@ -35,7 +29,7 @@ class Engine {
     Renderer* renderer;
     InputHandler* inputHandler;
     // AudioMixer* mixer;
-    // Player* player;
+    Player* player;
     // vector<Enemy*> enemies;
     // const int enemyTypeCount;
     Level* currentFloor;
@@ -50,7 +44,7 @@ class Engine {
     void handleDifficultyMenuInput();
     void handleInstructionsMenuInput();
 
-    void handleInGame();
+    void handleInGame(bool& quit);
 
     void generateRooms();
     void placePlayerInRoom(bool edge, int side);

@@ -1,5 +1,7 @@
 #include <InputHandler.hpp>
 
+#include <Macros.h>
+
 InputHandler::InputHandler() {
   // Initialize all keys as not pressed
   for (int i = 0; i < SDL_NUM_SCANCODES; i++) {

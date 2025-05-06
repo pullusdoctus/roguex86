@@ -1,5 +1,7 @@
 #include <Renderer.hpp>
+
 #include <iostream>
+#include <Macros.h>
 
 Renderer::Renderer() : window(nullptr), renderer(nullptr),
   width(WINDOW_WIDTH), height(WINDOW_HEIGHT) {
@@ -91,29 +93,30 @@ SDL_Texture* Renderer::renderText(const char* message, int font,
   return texture;
 }
 
-void Renderer::renderGame() {
+void Renderer::renderGame(Room* currentRoom, Player* player) {
   // Clear the screen
-  SDL_SetRenderDrawColor(renderer->getRenderer(), 0, 0, 0, 255);
-  SDL_RenderClear(renderer->getRenderer());
+  SDL_SetRenderDrawColor(this->renderer, 0, 0, 0, 255);
+  SDL_RenderClear(this->renderer);
   // Render the room and player
-  currentRoom->render(renderer->getRenderer(), player);
+  currentRoom->render(this->renderer, player);
   // Present the rendered frame
-  SDL_RenderPresent(renderer->getRenderer());
+  SDL_RenderPresent(this->renderer);
 }
 
 // TODO: update once Player exists
-void Renderer::renderRoom(Room& room/*, Player& player*/) {
+void Renderer::renderRoom(Room* room, Player* player) {
+  (void)room;
+  this->renderPlayer(player, 0, 0);
 }
 
-void Renderer::renderRoom(/*Player& player*/) {
-  this->renderPlayer();
+void Renderer::renderPlayer(Player* player, int offsetX, int offsetY) {
   SDL_Rect destRect = {
-    offsetX + x * TILE_SIZE,
-    offsetY + y * TILE_SIZE,
+    offsetX + player->x * TILE_SIZE,
+    offsetY + player->y * TILE_SIZE,
     TILE_SIZE,
     TILE_SIZE
   };
-  SDL_RenderCopy(renderer, texture, NULL, &destRect);
+  SDL_RenderCopy(this->renderer, player->sprite, NULL, &destRect);
 }
 
 void Renderer::showMainMenu() {
