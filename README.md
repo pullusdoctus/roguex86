@@ -1,6 +1,6 @@
 # roguex86
 
-A simple roguelike written in x86 Assembly
+A simple roguelike written in x86 Assembly and C++
 
 ## User Manual
 
@@ -10,7 +10,8 @@ The current process of compilation only supports 64-bit Linux distributions. Not
 
 SDL2 modules needed:
 
-- SDL2 TTF.
+- SDL2 TTF
+- SDL2 Image
 
 For ease of compilation, a Makefile is provided. Simply run the `make` command to compile.
 
@@ -41,12 +42,13 @@ For more details on how the game is designed, visit the [design directory](./des
 
 ### Priorities
 
-- [ ] Click New Game > Game Loads
-- [ ] Test Volume Changes with Slider
-- [ ] Difficulty Changes when selecting another difficulty in Difficulty screen
-- [ ] Finish design of assets: Loading Screen, Floor Tiles
-- [ ] Design controls: WASD/Arrows
+- [ ] Finish asset design: Loading Screen, Defeat Screen, Victory Screen
 - [ ] Design level generation
     - [ ] Figure out how to connect rooms
     - [ ] Limit floor size (< 10 floors, < 5 rooms)
     - [ ] Figure out how to place stairs/boss
+- [ ] Combat
+    - [ ] attack
+    - [ ] defend
+    - [ ] Character dies, combat ends
+    - [ ] Player dies, game ends
