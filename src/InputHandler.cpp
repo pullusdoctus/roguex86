@@ -148,3 +148,18 @@ bool InputHandler::isXPositionInSlider(int x, Renderer* renderer) {
     return (x >= bounds.x && x <= bounds.x + bounds.w);
 }
 
+void InputHandler::handlePlayerMovement(Player *player)
+{
+  if (this->keyPressed(W_KEY)) {
+    player->y -= 1;
+  }
+  if (this->keyPressed(S_KEY)) {
+    player->y += 1;
+  }
+  if (this->keyPressed(A_KEY)) {
+    player->x -= 1;
+  }
+  if (this->keyPressed(D_KEY)) {
+    player->x += 1;
+  }
+}

@@ -41,4 +41,7 @@ class InputHandler {
     bool isPointInHardButton(SDL_Point& mouse, Renderer* renderer);
     bool isPointInVolumeSlider(SDL_Point& mouse, Renderer* renderer);
     bool isXPositionInSlider(int x, Renderer* renderer);
+
+    void handlePlayerMovement(Player* player);
+
 };
