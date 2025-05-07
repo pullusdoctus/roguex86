@@ -2,6 +2,7 @@
 
 #include <Renderer.hpp>
 #include <SDL.h>
+#include <random>
 
 class InputHandler {
   private:
@@ -42,6 +43,6 @@ class InputHandler {
     bool isPointInVolumeSlider(SDL_Point& mouse, Renderer* renderer);
     bool isXPositionInSlider(int x, Renderer* renderer);
 
-    void handlePlayerMovement(Player* player, Room* room);
+    bool handlePlayerMovement(Player* player, Room* room, int difficulty);
 
 };

@@ -148,19 +148,66 @@ bool InputHandler::isXPositionInSlider(int x, Renderer* renderer) {
     return (x >= bounds.x && x <= bounds.x + bounds.w);
 }
 
-void InputHandler::handlePlayerMovement(Player *player, Room *room)
+bool InputHandler::handlePlayerMovement(Player *player, Room *room, int difficulty)
 {
-  int newX = player->x;
-  int newY = player->y;
+  // Random number generator for combat probability
+  static std::random_device rd;
+  static std::mt19937 gen(rd());
+  static std::uniform_int_distribution<> dist(1, 100);
 
-  if (this->keyPressed(W_KEY)) newY--;
-  if (this->keyPressed(S_KEY)) newY++;
-  if (this->keyPressed(A_KEY)) newX--;
-  if (this->keyPressed(D_KEY)) newX++;
+  // Check for player movement
+  bool moved = false;
+  // Check for combat
+  bool combat = false;
+  //chance of combat
+  int chance = 0;
 
-  if (room->checkWalkable(newX, newY)) {
-    player->x = newX;
-    player->y = newY;
+  if (this->keyPressed(W_KEY)) {
+    if (room->checkWalkable(player->x, player->y - 1)) {
+      player->y -= 1;
+      moved = true;
+    }
   }
+
+  if (this->keyPressed(S_KEY)) {
+    if (room->checkWalkable(player->x, player->y + 1)) {
+      player->y += 1;
+      moved = true;
+    }
+  }
+
+  if (this->keyPressed(A_KEY)) {
+    if (room->checkWalkable(player->x - 1, player->y)) {
+      player->x -= 1;
+      moved = true;
+    }
+  }
+
+  if (this->keyPressed(D_KEY)) {
+    if (room->checkWalkable(player->x + 1, player->y)) {
+      player->x += 1;
+      moved = true;
+    }
+  }
+
+  if (difficulty == 0) {
+    chance = 10; // 10% chance of combat
+  } else if (difficulty == 1) {
+    chance = 20; // 20% chance of combat
+  } else if (difficulty == 2)
+  {
+    chance = 30; // 30% chance of combat
+  }
+  
+
+  if (moved) {
+    int roll = dist(gen); // Roll a number between 1 and 100
+    if (roll <= chance) {     // 10% of chance to trigger combat
+      SDL_Log("¡Combate iniciado!");
+      combat = true;    // Trigger combat
+    }
+  }
+
+  return combat;
 
 }
