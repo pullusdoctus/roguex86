@@ -5,7 +5,7 @@
 # Directories
 SRC_DIR		:= src
 ASM_DIR		:= $(SRC_DIR)/asm
-LIB_DIR		:= lib
+INC_DIR		:= inc
 RSC_DIR		:= rsc
 BUILD_DIR	:= build
 BIN_DIR		:= bin
@@ -18,11 +18,11 @@ TARGET		:= $(BIN_DIR)/roguex86
 CC				:= gcc
 XC				:= g++
 SDLFLAGS	:= $(shell sdl2-config --cflags)
-CFLAGS		:= -Wall -Wextra -g -I$(LIB_DIR) $(SDLFLAGS)
+CFLAGS		:= -Wall -Wextra -g -I$(INC_DIR) $(SDLFLAGS)
 XCFLAGS		:= $(CFLAGS)
 AS				:= nasm
 ASFLAGS		:= -f elf64
-SDL_LIBS		:= $(shell sdl2-config --libs) -lSDL2_ttf
+SDL_LIBS		:= $(shell sdl2-config --libs) -lSDL2_ttf -lSDL2_image
 # -----------------------------------------
 
 # File variables
