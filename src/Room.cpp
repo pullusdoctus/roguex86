@@ -81,6 +81,16 @@ TileType Room::getTileAt(int x, int y) const {
   return tiles[y][x];
 }
 
+bool Room::checkWalkable(int x, int y) const
+{
+  // Verificamos si está dentro de los límites del mapa
+  if (y < 0 || y >= this->height || x < 0 || x >= this->width) {
+    return false;
+  }
+  // Caminable solo si el tipo de tile es FLOOR
+  return this->tiles[y][x] == TileType::FLOOR;
+}
+
 SDL_Point Room::calculateRoomPosition() const {
   // Center the room in the window
   int offsetX = (WINDOW_WIDTH - width * TILE_SIZE) / 2;

@@ -42,6 +42,6 @@ class InputHandler {
     bool isPointInVolumeSlider(SDL_Point& mouse, Renderer* renderer);
     bool isXPositionInSlider(int x, Renderer* renderer);
 
-    void handlePlayerMovement(Player* player);
+    void handlePlayerMovement(Player* player, Room* room);
 
 };

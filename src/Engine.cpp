@@ -268,7 +268,7 @@ void Engine::handleInGame(bool& quit) {
     quit = true;
   }
   // TODO: handle movement
-  this->inputHandler->handlePlayerMovement(this->player);
+  this->inputHandler->handlePlayerMovement(this->player, this->currentFloor->getCurrentRoom());
 }
 
 void Engine::generateRooms() {

@@ -37,6 +37,10 @@ public:
     SDL_Texture* getWall() { return this->wallTile; }
     // Get tile at position
     TileType getTileAt(int x, int y) const;
+
+    //check if tile is walkable
+    bool checkWalkable(int x, int y) const;
+
     // Calculate room position in the window
     SDL_Point calculateRoomPosition() const;
 };
