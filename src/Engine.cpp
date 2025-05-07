@@ -10,6 +10,8 @@
 Engine::Engine() : newGame(true) {
   this->renderer = new Renderer;
   this->inputHandler = new InputHandler;
+  this->player = new Player;
+  this->player->loadSprite(this->renderer->getSDLRenderer(), PLAYER_SPRITE);
   this->currentFloor = new Level;
   this->gameState = MAIN_MENU;
   if (!readSettings()) {
@@ -32,6 +34,7 @@ Engine::Engine() : newGame(true) {
 Engine::~Engine() {
   delete this->renderer;
   delete this->inputHandler;
+  delete this->player;
   delete this->currentFloor;
 }
 
@@ -97,6 +100,7 @@ void Engine::runGame(bool& quit) {
   this->generateRooms();
   Room currentRoom = this->currentFloor->getCurrentRoom();
   if (newGame) {
+    this->placePlayerInRoom(false, LEFT);  // side is irrelevant here
     this->renderer->renderGame(&currentRoom, this->player);
     this->newGame = false;
   }
@@ -261,7 +265,6 @@ void Engine::handleInGame(bool& quit) {
   if (this->inputHandler->keyPressed(ESC)) {
     // TODO: open pause menu
     quit = true;
-    return;
   }
   // TODO: handle movement
 }
@@ -278,7 +281,7 @@ void Engine::generateRooms() {
   }
 }
 
-void Engine::placePlayerInRoom(bool edge, int side) {
+void Engine::placePlayerInRoom(bool edge, RoomSide side) {
   // TODO: handle room change
   (void) edge;
   (void) side;

@@ -24,6 +24,13 @@ enum Difficulty {
   HARD
 };
 
+enum RoomSide {
+  LEFT,
+  RIGHT,
+  UP,
+  DOWN
+};
+
 class Engine {
   private:
     Renderer* renderer;
@@ -52,7 +59,7 @@ class Engine {
     void handleInGame(bool& quit);
 
     void generateRooms();
-    void placePlayerInRoom(bool edge, int side);
+    void placePlayerInRoom(bool edge, RoomSide side);
 
     bool readSettings();
     void writeSettings() const;

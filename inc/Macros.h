@@ -23,7 +23,6 @@
 #define WALL_TILE "./rsc/img/tiles/wall_tile.png"
 #define FLOOR_TILE "./rsc/img/tiles/floor_tile.png"
 
-
 // Main Menu button coordinates
 #define MENU_TITLE_Y 100
 #define MENU_LEFT_X 200
@@ -38,7 +37,6 @@
 #define MENU_INST_OFFSET 50
 #define MENU_INST_SUBT 300
 
-
 // Rooms per level limits
 #define MIN_ROOM_COUNT 3
 #define MAX_ROOM_COUNT 6
@@ -49,4 +47,3 @@
 #define S_KEY SDL_SCANCODE_S
 #define A_KEY SDL_SCANCODE_A
 #define D_KEY SDL_SCANCODE_D
-
