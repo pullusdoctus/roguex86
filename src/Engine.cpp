@@ -98,14 +98,14 @@ int Engine::run() {
 
 void Engine::runGame(bool& quit) {
   this->generateRooms();
-  Room currentRoom = this->currentFloor->getCurrentRoom();
-  if (newGame) {
-    this->placePlayerInRoom(false, LEFT);  // side is irrelevant here
-    this->renderer->renderGame(&currentRoom, this->player);
-    this->newGame = false;
-  }
+  this->placePlayerInRoom(false, LEFT);  // side is irrelevant here
   while (this->gameState == IN_GAME && !quit) {
-    this->renderer->renderRoom(&currentRoom, this->player);
+    if (this->inputHandler->processEvents()) {
+      quit = true;
+      continue;
+    }
+    Room* currentRoom = this->currentFloor->getCurrentRoom();
+    this->renderer->renderGame(currentRoom, this->player);
     this->handleInGame(quit);
   }
 }
@@ -285,9 +285,9 @@ void Engine::placePlayerInRoom(bool edge, RoomSide side) {
   // TODO: handle room change
   (void) edge;
   (void) side;
-  Room currentRoom = this->currentFloor->getCurrentRoom();
-  this->player->x = currentRoom.getWidth() / 2;
-  this->player->y = currentRoom.getHeight() / 2;
+  Room* currentRoom = this->currentFloor->getCurrentRoom();
+  this->player->x = currentRoom->getWidth() / 2;
+  this->player->y = currentRoom->getHeight() / 2;
 }
 
 bool Engine::readSettings() {

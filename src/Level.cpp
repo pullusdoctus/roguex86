@@ -19,10 +19,10 @@ Room Level::getRoom(int room) {
   throw std::out_of_range("Room index out of bounds");
 }
 
-Room Level::getCurrentRoom() {
+Room* Level::getCurrentRoom() {
   if (this->currentRoom >= 0
     && this->currentRoom < static_cast<int>(this->rooms.size())) {
-    return *this->rooms[this->currentRoom];
+    return this->rooms[this->currentRoom];
   }
   throw std::out_of_range("Current room index out of bounds");
 }

@@ -69,8 +69,8 @@ class Renderer {
     // TODO: draws the loading screen
     void showLoadingScreen();
     void renderGame(Room* currentRoom, Player* player);
-    void renderRoom(Room* room, Player* player);
-    void renderPlayer(Player* player, int offsetX, int offsetY);
+    void renderRoom(Room* room);
+    void renderPlayer(Room* room, Player* player);
     // TODO: draw the pause menu when prompted in-game
     void showPauseMenu();
 

@@ -98,42 +98,41 @@ void Renderer::renderGame(Room* currentRoom, Player* player) {
   SDL_SetRenderDrawColor(this->renderer, 0, 0, 0, 255);
   SDL_RenderClear(this->renderer);
   // Render the room and player
-  this->renderRoom(currentRoom, player);
+  this->renderRoom(currentRoom);
+  this->renderPlayer(currentRoom, player);
+  SDL_RenderPresent(this->renderer);
 }
 
-void Renderer::renderRoom(Room* room, Player* player) {
+void Renderer::renderRoom(Room* room) {
   // Calculate room position in the window
   SDL_Point roomPos = room->calculateRoomPosition();
   // Draw room tiles
   for (int y = 0; y < room->getHeight(); ++y) {
     for (int x = 0; x < room->getWidth(); ++x) {
-      SDL_Rect destRect = {
+      SDL_Rect dst = {
         roomPos.x + x * TILE_SIZE,
         roomPos.y + y * TILE_SIZE,
         TILE_SIZE,
         TILE_SIZE
       };
       // Draw the appropriate texture based on tile type
-      if (room->getTileAt(x, y) == FLOOR) {
-        SDL_RenderCopy(this->renderer, room->getFloor(), NULL, &destRect);
-      } else {
-        SDL_RenderCopy(this->renderer, room->getWall(), NULL, &destRect);
-      }
+      auto tile = (room->getTileAt(x, y) == FLOOR)
+        ? room->getFloor()
+        : room->getWall();
+      SDL_RenderCopy(this->renderer, tile, NULL, &dst);
     }
   }
-  this->renderPlayer(player, roomPos.x, roomPos.y);
-  // Present the rendered frame
-  SDL_RenderPresent(this->renderer);
 }
 
-void Renderer::renderPlayer(Player* player, int offsetX, int offsetY) {
-  SDL_Rect destRect = {
-    offsetX + player->x * TILE_SIZE,
-    offsetY + player->y * TILE_SIZE,
+void Renderer::renderPlayer(Room* room, Player* player) {
+  SDL_Point roomPos = room->calculateRoomPosition();
+  SDL_Rect dst = {
+    roomPos.x + player->x * TILE_SIZE,
+    roomPos.y + player->y * TILE_SIZE,
     TILE_SIZE,
     TILE_SIZE
   };
-  SDL_RenderCopy(this->renderer, player->sprite, NULL, &destRect);
+  SDL_RenderCopy(this->renderer, player->sprite, NULL, &dst);
 }
 
 void Renderer::showMainMenu() {
