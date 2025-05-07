@@ -126,13 +126,13 @@ void Renderer::renderRoom(Room* room) {
 
 void Renderer::renderPlayer(Room* room, Player* player) {
   SDL_Point roomPos = room->calculateRoomPosition();
-  SDL_Rect dst = {
+  player->rect = {
     roomPos.x + player->x * TILE_SIZE,
     roomPos.y + player->y * TILE_SIZE,
     TILE_SIZE,
     TILE_SIZE
   };
-  SDL_RenderCopy(this->renderer, player->sprite, NULL, &dst);
+  player->draw(this->renderer);
 }
 
 void Renderer::showMainMenu() {

@@ -10,8 +10,8 @@
 Engine::Engine() : newGame(true) {
   this->renderer = new Renderer;
   this->inputHandler = new InputHandler;
-  this->player = new Player;
-  this->player->loadSprite(this->renderer->getSDLRenderer(), PLAYER_SPRITE);
+  this->player = nullptr;
+  //this->player->loadSprite(this->renderer->getSDLRenderer(), PLAYER_SPRITE);
   this->currentFloor = new Level;
   this->gameState = MAIN_MENU;
   if (!readSettings()) {
@@ -98,6 +98,7 @@ int Engine::run() {
 
 void Engine::runGame(bool& quit) {
   this->generateRooms();
+  this->initializePlayer();
   this->placePlayerInRoom(false, LEFT);  // side is irrelevant here
   while (this->gameState == IN_GAME && !quit) {
     if (this->inputHandler->processEvents()) {
@@ -279,6 +280,11 @@ void Engine::generateRooms() {
     newRoom->generate(this->renderer->getSDLRenderer());
     this->currentFloor->addRoom(newRoom);
   }
+}
+
+void Engine::initializePlayer() {
+  this->player = new Player(this->renderer->getSDLRenderer(),
+                            PLAYER_SPRITE, 0, 0);
 }
 
 void Engine::placePlayerInRoom(bool edge, RoomSide side) {

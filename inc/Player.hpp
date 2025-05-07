@@ -8,7 +8,8 @@ class Player : public Character {
     int x; // Position in tile coordinates
     int y;
 
-    Player();
+    Player(SDL_Renderer* renderer, const std::string& spritePath, int startX,
+           int startY);
     ~Player();
 
     void render(SDL_Renderer* renderer, int offsetX, int offsetY);

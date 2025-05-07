@@ -59,6 +59,7 @@ class Engine {
     void handleInGame(bool& quit);
 
     void generateRooms();
+    void initializePlayer();
     void placePlayerInRoom(bool edge, RoomSide side);
 
     bool readSettings();
