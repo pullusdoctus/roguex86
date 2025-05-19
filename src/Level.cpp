@@ -1,6 +1,8 @@
 #include <Level.hpp>
 
+#include <algorithm>
 #include <iostream>
+#include <random>
 #include <stdexcept>
 
 Level::Level() : roomCount(0), currentRoom(0) {
@@ -53,17 +55,28 @@ bool Level::connectRooms() {
   }
   // connect rooms without connections
   bool changeMade;
+  bool roomsRemoved = false;
+  // store all directions to try and connect randomly
+  std::vector<Direction> directions = {NORTH, SOUTH, WEST, EAST};
   do {
     changeMade = false;
+    // try to connect each room at least once
     for (size_t roomAIndex = 0; roomAIndex < rooms.size(); ++roomAIndex) {
       if (roomConnected[roomAIndex]) continue;  // ignore rooms w/ connections
       // connect to other rooms
       Room* roomA = rooms[roomAIndex];
       bool roomAConnected = false;
+      // get a random direction to try and connect from
+      std::random_device rd;
+      std::mt19937 g(rd());
+      std::shuffle(directions.begin(), directions.end(), g);
+      // to check if this direction has already been tried
+      std::vector<Direction> tried;
       // check all four directions
-      for (Direction dir = NORTH; dir <= EAST; ++dir) {
+      for (Direction dir : directions) {
         // don't connect on a direction with an existing connection
         if (roomA->getAdjacentRoom(dir) != nullptr) continue;
+        tried.push_back(dir);
         // find a room to connect to
         for (size_t roomBIndex = 0; roomBIndex < rooms.size() &&
         !roomAConnected; ++roomBIndex) {
@@ -85,8 +98,30 @@ bool Level::connectRooms() {
           changeMade = true;
         }
       }
+      // if a connection couldn't be made for room A
+      if (!roomAConnected) {
+        // double check it doesn't have connections
+        bool hasConnections = false;
+        for (Direction dir = NORTH; dir <= EAST; ++dir) {
+          if (roomA->getAdjacentRoom(dir)) {
+            hasConnections = true;
+            break;
+          }
+        }
+        // after double checking, if it actually isn't connected to another room
+        if (!hasConnections) {
+          // delete the room from memory
+          delete this->rooms[roomAIndex];
+          this->rooms.erase(this->rooms.begin() + roomAIndex);
+          roomConnected.erase(roomConnected.begin() + roomAIndex);
+          roomAIndex--;  // adjust index after removal
+          roomsRemoved = true;
+          changeMade = true;
+        }
+      }
     }
   } while (changeMade);
+  if (roomsRemoved) this->roomCount = this->rooms.size();
   // check if all rooms were connected
   for (size_t i = 0; i < rooms.size(); ++i) {
     if (!roomHasConnection(i)) {
