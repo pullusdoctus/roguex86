@@ -30,6 +30,7 @@ class Engine {
     InputHandler* inputHandler;
     // AudioMixer* mixer;
     Player* player;
+    bool justMovedRooms;
     // vector<Enemy*> enemies;
     // const int enemyTypeCount;
     Level* currentFloor;

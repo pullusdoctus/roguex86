@@ -11,6 +11,7 @@ Engine::Engine() : newGame(true) {
   this->renderer = new Renderer;
   this->inputHandler = new InputHandler;
   this->player = nullptr;
+  this->justMovedRooms = false;
   //this->player->loadSprite(this->renderer->getSDLRenderer(), PLAYER_SPRITE);
   this->currentFloor = new Level;
   this->gameState = MAIN_MENU;
@@ -105,8 +106,6 @@ void Engine::runGame(bool& quit) {
       quit = true;
       continue;
     }
-    Room* currentRoom = this->currentFloor->getCurrentRoom();
-    this->renderer->renderGame(currentRoom, this->player);
     this->handleInGame(quit);
   }
 }
@@ -267,23 +266,42 @@ void Engine::handleInGame(bool& quit) {
     // TODO: open pause menu
     quit = true;
   }
-  this->inputHandler->
-    handlePlayerMovement(this->player, this->currentFloor->getCurrentRoom(),
-                         this->difficulty);
-  // check if the player reached a doorway
+  this->inputHandler->handlePlayerMovement(
+    this->player, this->currentFloor->getCurrentRoom(), this->difficulty);
   Room* currentRoom = this->currentFloor->getCurrentRoom();
+  // check if the player reached a doorway
   // check what doorway was reached
-  for (Direction dir = NORTH; dir <= EAST; ++dir) {
-    // if a room was found in this direction
-    if (currentRoom->getAdjacentRoom(dir)) {
-      // check if the player is in that doorway
-      auto [x, y] = currentRoom->getDoorwayPosition(dir);
-      if (this->player->x == x && this->player->y == y) {
-        this->placePlayerInRoom(true, dir);
-        break;
+  if (!this->justMovedRooms) {
+    for (Direction dir = NORTH; dir <= EAST; ++dir) {
+      // if a room was found in this direction
+      if (currentRoom->getAdjacentRoom(dir)) {
+        // check if the player is in that doorway
+        auto [x, y] = currentRoom->getDoorwayPosition(dir);
+        if (this->player->x == x && this->player->y == y) {
+          // place the player in the new room
+          this->placePlayerInRoom(true, dir);
+          this->justMovedRooms = true;
+          break;
+        }
       }
     }
+  } else {
+    // reset justMovedRooms once the player moves out of a doorway
+    bool stillInDoorway = false;
+    for (Direction dir = NORTH; dir <= EAST; ++dir) {
+      if (currentRoom->getAdjacentRoom(dir)) {
+        auto [x, y] = currentRoom->getDoorwayPosition(dir);
+        if (this->player->x == x && this->player->y == y) {
+          stillInDoorway = true;
+          break;
+        }
+      }
+    }
+    if (!stillInDoorway) {
+      this->justMovedRooms = false;
+    }
   }
+  this->renderer->renderGame(currentRoom, this->player);
 }
 
 void Engine::generateFloor() {

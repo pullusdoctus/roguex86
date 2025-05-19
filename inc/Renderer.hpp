@@ -73,6 +73,7 @@ class Renderer {
     void renderPlayer(Room* room, Player* player);
     // TODO: draw the pause menu when prompted in-game
     void showPauseMenu();
+    void clearScreen();
 
     void storeMenuItemBounds(MainMenuButtonID id, const SDL_Rect& bounds);
     const SDL_Rect& getMenuItemBounds(MainMenuButtonID id) const;
