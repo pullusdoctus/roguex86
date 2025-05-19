@@ -174,8 +174,9 @@ bool Room::checkWalkable(int x, int y) const
   if (y < 0 || y >= this->height || x < 0 || x >= this->width) {
     return false;
   }
-  // Caminable solo si el tipo de tile es FLOOR
-  return this->tiles[y][x] == TileType::FLOOR;
+  // Caminable solo si el tipo de tile es FLOOR o STAIRCASE
+  return this->tiles[y][x] == TileType::FLOOR ||
+          this->tiles[y][x] == TileType::STAIRCASE;
 }
 
 SDL_Point Room::calculateRoomPosition() const {
