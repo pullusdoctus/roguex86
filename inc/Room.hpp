@@ -22,6 +22,11 @@ private:
     void initializeTiles();
     // Load textures
     bool loadTextures(SDL_Renderer* renderer);
+    // pointers to adjacent rooms
+    Room* north;
+    Room* south;
+    Room* west;
+    Room* east;
 
 public:
     Room();

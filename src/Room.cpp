@@ -3,11 +3,11 @@
 #include <chrono>
 #include <SDL_image.h>
 #include <iostream>
+#include <asm.h>
 #include <Macros.h>
-#include <random>
 
-Room::Room()
-    : width(0), height(0), floorTile(nullptr), wallTile(nullptr) {
+Room::Room() : width(0), height(0), floorTile(nullptr), wallTile(nullptr),
+  north(nullptr), south(nullptr), west(nullptr), east(nullptr) {
 }
 
 Room::~Room() {
@@ -20,11 +20,8 @@ Room::~Room() {
 }
 
 void Room::generateDimensions() {
-  std::mt19937 rng(std::random_device{}());
-  std::uniform_int_distribution<int> height(MIN_ROOM_SIZE, MAX_ROOM_HEIGHT);
-  std::uniform_int_distribution<int> width(MIN_ROOM_SIZE, MAX_ROOM_WIDTH);
-  this->height = height(rng);
-  this->width = width(rng);
+  this->height = rand_between(MIN_ROOM_SIZE, MAX_ROOM_HEIGHT);
+  this->width = rand_between(MIN_ROOM_SIZE, MAX_ROOM_WIDTH);
 }
 
 void Room::initializeTiles() {
