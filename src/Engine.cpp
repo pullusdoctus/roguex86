@@ -4,8 +4,8 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <asm.h>
 #include <Macros.h>
-#include <random>
 
 Engine::Engine() : newGame(true) {
   this->renderer = new Renderer;
@@ -97,7 +97,7 @@ int Engine::run() {
 }
 
 void Engine::runGame(bool& quit) {
-  this->generateRooms();
+  this->generateFloor();
   this->initializePlayer();
   this->placePlayerInRoom(false, LEFT);  // side is irrelevant here
   while (this->gameState == IN_GAME && !quit) {
@@ -271,15 +271,17 @@ void Engine::handleInGame(bool& quit) {
   this->inputHandler->handlePlayerMovement(this->player, this->currentFloor->getCurrentRoom(),this->difficulty);
 }
 
-void Engine::generateRooms() {
+void Engine::generateFloor() {
   // Generate at least 3 rooms, and at most 6
-  std::mt19937 rng(std::random_device{}());
-  std::uniform_int_distribution<int> dist(MIN_ROOM_COUNT, MAX_ROOM_COUNT);
-  this->currentFloor->setRoomCount(dist(rng));
+  int roomCount = rand_between(MIN_ROOM_COUNT, MAX_ROOM_COUNT);
+  this->currentFloor->setRoomCount(roomCount);
   for (int room = 0; room < this->currentFloor->getRoomCount(); ++room) {
     Room* newRoom = new Room;
     newRoom->generate(this->renderer->getSDLRenderer());
     this->currentFloor->addRoom(newRoom);
+  }
+  if (!this->currentFloor->connectRooms()) {
+    std::cerr << "Error: Room connection failed" << std::endl;
   }
 }
 

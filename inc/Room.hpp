@@ -9,6 +9,18 @@ enum TileType {
     WALL
 };
 
+enum Direction {
+    NORTH,
+    SOUTH,
+    WEST,
+    EAST
+};
+
+// ++direction
+Direction& operator++(Direction& dir);
+Direction operator++(Direction& dir, int);
+// direction++
+
 class Room {
 private:
     int width;  // In tiles
@@ -42,6 +54,13 @@ public:
     SDL_Texture* getWall() { return this->wallTile; }
     // Get tile at position
     TileType getTileAt(int x, int y) const;
+
+    // helpers for room connections
+    Room* getAdjacentRoom(Direction dir);
+    Direction getOppositeDirection(Direction dir);
+    void createDoorway(Direction dir);
+    std::pair<int, int> getDoorwayPosition(Direction dir);
+    void connect(Direction dir, Room* room);
 
     //check if tile is walkable
     bool checkWalkable(int x, int y) const;

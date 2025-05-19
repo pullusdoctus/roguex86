@@ -6,6 +6,32 @@
 #include <asm.h>
 #include <Macros.h>
 
+// ++direction
+Direction& operator++(Direction& dir) {
+  switch (dir) {
+    case Direction::NORTH:
+      dir = Direction::SOUTH;
+      break;
+    case Direction::SOUTH:
+      dir = Direction::WEST;
+      break;
+    case Direction::WEST:
+      dir = Direction::EAST;
+      break;
+    case Direction::EAST:
+      dir = Direction::NORTH;
+      break;
+  }
+  return dir;
+}
+
+// direction++
+Direction operator++(Direction& dir, int) {
+  Direction old = dir;
+  ++dir;
+  return old;
+}
+
 Room::Room() : width(0), height(0), floorTile(nullptr), wallTile(nullptr),
   north(nullptr), south(nullptr), west(nullptr), east(nullptr) {
 }
@@ -76,6 +102,54 @@ TileType Room::getTileAt(int x, int y) const {
     return WALL; // Out of bounds is considered a wall
   }
   return tiles[y][x];
+}
+
+Room* Room::getAdjacentRoom(Direction dir) {
+  switch (dir) {
+    case NORTH: return this->north;
+    case SOUTH: return this->south;
+    case WEST: return this->west;
+    case EAST: return this->east;
+    default: return nullptr;
+  }
+}
+
+
+Direction Room::getOppositeDirection(Direction dir) {
+  switch (dir) {
+    case NORTH: return SOUTH;
+    case SOUTH: return NORTH;
+    case WEST: return EAST;
+    case EAST: return WEST;
+    default: return dir;
+  }
+}
+
+void Room::createDoorway(Direction dir) {
+  auto [x, y] = getDoorwayPosition(dir);
+  tiles[y][x] = FLOOR;
+}
+
+std::pair<int, int> Room::getDoorwayPosition(Direction dir) {
+  switch (dir) {
+    case NORTH: return {width/2, 0};
+    case SOUTH: return {width/2, height-1};
+    case WEST: return {width-1, height/2};
+    case EAST: return {0, height/2};
+    default: return {-1, -1};  // invalid edge
+  }
+}
+
+void Room::connect(Direction dir, Room* room) {
+  if (dir == NORTH) {
+    this->north = room;
+  } else if (dir == SOUTH) {
+    this->south = room;
+  } else if (dir == WEST) {
+    this->west = room;
+  } else {
+    this->east = room;
+  }
 }
 
 bool Room::checkWalkable(int x, int y) const

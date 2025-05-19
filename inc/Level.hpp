@@ -18,4 +18,8 @@ class Level {
 
     void setRoomCount(int newRoomCount);
     int getRoomCount();
+
+    bool connectRooms();
+    bool roomHasConnection(int i);
+    // TODO: void placeStaircase();
 };

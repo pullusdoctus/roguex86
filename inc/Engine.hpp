@@ -58,7 +58,7 @@ class Engine {
     void handleInstructionsMenuInput();
     void handleInGame(bool& quit);
 
-    void generateRooms();
+    void generateFloor();
     void initializePlayer();
     void placePlayerInRoom(bool edge, RoomSide side);
 
