@@ -1,7 +1,9 @@
 #include <Level.hpp>
 
 #include <algorithm>
+#include <asm.h>
 #include <iostream>
+#include <Macros.h>
 #include <random>
 #include <stdexcept>
 
@@ -37,6 +39,20 @@ void Level::setRoomCount(int newRoomCount) {
 
 int Level::getRoomCount() {
   return this->roomCount;
+}
+
+void Level::generateFloor(SDL_Renderer* renderer) {
+  // Generate at least 3 rooms, and at most 6
+  int newRoomCount = rand_between(MIN_ROOM_COUNT, MAX_ROOM_COUNT);
+  this->roomCount = newRoomCount;
+  for (int room = 0; room < this->roomCount; ++room) {
+    Room* newRoom = new Room;
+    newRoom->generate(renderer);
+    this->addRoom(newRoom);
+  }
+  if (!this->connectRooms()) {
+    std::cerr << "Error: Room connection failed" << std::endl;
+  }
 }
 
 bool Level::connectRooms() {

@@ -19,6 +19,7 @@ class Level {
     void setRoomCount(int newRoomCount);
     int getRoomCount();
 
+    void generateFloor(SDL_Renderer* renderer);
     bool connectRooms();
     bool roomHasConnection(int i);
     void moveRoom(Room* nextRoom);

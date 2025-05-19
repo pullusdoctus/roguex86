@@ -98,7 +98,7 @@ int Engine::run() {
 }
 
 void Engine::runGame(bool& quit) {
-  this->generateFloor();
+  this->currentFloor->generateFloor(this->renderer->getSDLRenderer());
   this->initializePlayer();
   this->placePlayerInRoom(false, NORTH);  // side is irrelevant here
   while (this->gameState == IN_GAME && !quit) {
@@ -302,20 +302,6 @@ void Engine::handleInGame(bool& quit) {
     }
   }
   this->renderer->renderGame(currentRoom, this->player);
-}
-
-void Engine::generateFloor() {
-  // Generate at least 3 rooms, and at most 6
-  int roomCount = rand_between(MIN_ROOM_COUNT, MAX_ROOM_COUNT);
-  this->currentFloor->setRoomCount(roomCount);
-  for (int room = 0; room < this->currentFloor->getRoomCount(); ++room) {
-    Room* newRoom = new Room;
-    newRoom->generate(this->renderer->getSDLRenderer());
-    this->currentFloor->addRoom(newRoom);
-  }
-  if (!this->currentFloor->connectRooms()) {
-    std::cerr << "Error: Room connection failed" << std::endl;
-  }
 }
 
 void Engine::initializePlayer() {
