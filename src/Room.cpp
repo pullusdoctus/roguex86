@@ -19,7 +19,10 @@ Direction& operator++(Direction& dir) {
       dir = Direction::EAST;
       break;
     case Direction::EAST:
-      dir = Direction::NORTH;
+      dir = Direction::NONE;
+      break;
+    case Direction::NONE:
+      dir = Direction::NONE;
       break;
   }
   return dir;

@@ -1,5 +1,6 @@
 #include <Level.hpp>
 
+#include <iostream>
 #include <stdexcept>
 
 Level::Level() : roomCount(0), currentRoom(0) {
@@ -40,21 +41,22 @@ int Level::getRoomCount() {
 }
 
 bool Level::connectRooms() {
-  if (rooms.size() <= 1) {
-    return false;
-  }
+  if (rooms.size() <= 1) return false;
   // track which rooms have a connection to another room
   std::vector<bool> roomConnected(rooms.size(), false);
   // check if a room has adjacent rooms
+  std::cout << "checking room adjacency..." << std::endl;
+  std::cout << "room count: " << rooms.size() << std::endl;
   for (size_t i = 0; i < rooms.size(); ++i) {
     Room* room = rooms[i];
     for (Direction dir = NORTH; dir <= EAST; ++dir) {
       if (room->getAdjacentRoom(dir) != nullptr) {
         roomConnected[i] = true;
+        break;
       }
     }
-    roomConnected[i] = false;
   }
+  std::cout << "done checking room adjacency" << std::endl;
   // connect rooms without connections
   bool changeMade;
   do {
