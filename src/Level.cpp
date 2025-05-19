@@ -21,14 +21,11 @@ Room Level::getRoom(int room) {
 }
 
 Room* Level::getCurrentRoom() {
-  if (this->currentRoom >= 0
-    && this->currentRoom < static_cast<int>(this->rooms.size())) {
-    return this->rooms[this->currentRoom];
-  }
-  throw std::out_of_range("Current room index out of bounds");
+  return this->currentRoom;
 }
 
 void Level::addRoom(Room* room) {
+  if (!this->currentRoom) this->currentRoom = room;
   this->rooms.push_back(room);
 }
 
@@ -45,8 +42,6 @@ bool Level::connectRooms() {
   // track which rooms have a connection to another room
   std::vector<bool> roomConnected(rooms.size(), false);
   // check if a room has adjacent rooms
-  std::cout << "checking room adjacency..." << std::endl;
-  std::cout << "room count: " << rooms.size() << std::endl;
   for (size_t i = 0; i < rooms.size(); ++i) {
     Room* room = rooms[i];
     for (Direction dir = NORTH; dir <= EAST; ++dir) {
@@ -56,7 +51,6 @@ bool Level::connectRooms() {
       }
     }
   }
-  std::cout << "done checking room adjacency" << std::endl;
   // connect rooms without connections
   bool changeMade;
   do {
@@ -107,4 +101,13 @@ bool Level::roomHasConnection(int i) {
     if (this->rooms[i]->getAdjacentRoom(dir) != nullptr) return true;
   }
   return false;
+}
+
+void Level::moveRoom(Room* nextRoom) {
+  for (Room* room : this->rooms) {
+    if (room == nextRoom) {
+      this->currentRoom = nextRoom;
+      return;
+    }
+  }
 }

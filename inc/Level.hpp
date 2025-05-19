@@ -6,7 +6,7 @@ class Level {
   private:
     std::vector<Room*> rooms;
     int roomCount;
-    int currentRoom;
+    Room* currentRoom;
 
   public:
     Level();
@@ -21,5 +21,6 @@ class Level {
 
     bool connectRooms();
     bool roomHasConnection(int i);
+    void moveRoom(Room* nextRoom);
     // TODO: void placeStaircase();
 };

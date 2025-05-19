@@ -24,13 +24,6 @@ enum Difficulty {
   HARD
 };
 
-enum RoomSide {
-  LEFT,
-  RIGHT,
-  UP,
-  DOWN
-};
-
 class Engine {
   private:
     Renderer* renderer;
@@ -60,7 +53,7 @@ class Engine {
 
     void generateFloor();
     void initializePlayer();
-    void placePlayerInRoom(bool edge, RoomSide side);
+    void placePlayerInRoom(bool edge, Direction dir);
 
     bool readSettings();
     void writeSettings() const;

@@ -99,7 +99,7 @@ int Engine::run() {
 void Engine::runGame(bool& quit) {
   this->generateFloor();
   this->initializePlayer();
-  this->placePlayerInRoom(false, LEFT);  // side is irrelevant here
+  this->placePlayerInRoom(false, NORTH);  // side is irrelevant here
   while (this->gameState == IN_GAME && !quit) {
     if (this->inputHandler->processEvents()) {
       quit = true;
@@ -267,8 +267,23 @@ void Engine::handleInGame(bool& quit) {
     // TODO: open pause menu
     quit = true;
   }
-  // TODO: handle movement
-  this->inputHandler->handlePlayerMovement(this->player, this->currentFloor->getCurrentRoom(),this->difficulty);
+  this->inputHandler->
+    handlePlayerMovement(this->player, this->currentFloor->getCurrentRoom(),
+                         this->difficulty);
+  // check if the player reached a doorway
+  Room* currentRoom = this->currentFloor->getCurrentRoom();
+  // check what doorway was reached
+  for (Direction dir = NORTH; dir <= EAST; ++dir) {
+    // if a room was found in this direction
+    if (currentRoom->getAdjacentRoom(dir)) {
+      // check if the player is in that doorway
+      auto [x, y] = currentRoom->getDoorwayPosition(dir);
+      if (this->player->x == x && this->player->y == y) {
+        this->placePlayerInRoom(true, dir);
+        break;
+      }
+    }
+  }
 }
 
 void Engine::generateFloor() {
@@ -290,13 +305,19 @@ void Engine::initializePlayer() {
                             PLAYER_SPRITE, 0, 0);
 }
 
-void Engine::placePlayerInRoom(bool edge, RoomSide side) {
-  // TODO: handle room change
-  (void) edge;
-  (void) side;
+void Engine::placePlayerInRoom(bool edge, Direction dir) {
   Room* currentRoom = this->currentFloor->getCurrentRoom();
-  this->player->x = currentRoom->getWidth() / 2;
-  this->player->y = currentRoom->getHeight() / 2;
+  if (!edge) {
+    this->player->x = currentRoom->getWidth() / 2;
+    this->player->y = currentRoom->getHeight() / 2;
+    return;
+  }
+  Room* nextRoom = currentRoom->getAdjacentRoom(dir);
+  Direction oppDir = nextRoom->getOppositeDirection(dir);
+  auto [x, y] = nextRoom->getDoorwayPosition(oppDir);
+  this->player->x = x;
+  this->player->y = y;
+  this->currentFloor->moveRoom(nextRoom);
 }
 
 bool Engine::readSettings() {
