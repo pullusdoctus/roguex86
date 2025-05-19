@@ -22,6 +22,7 @@
 #define MAX_ROOM_WIDTH 19
 #define WALL_TILE "./rsc/img/tiles/wall_tile.png"
 #define FLOOR_TILE "./rsc/img/tiles/floor_tile.png"
+#define STAIRCASE_TILE "./rsc/img/tiles/stair_tile.png"
 
 // Main Menu button coordinates
 #define MENU_TITLE_Y 100

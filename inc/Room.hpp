@@ -6,7 +6,8 @@
 
 enum TileType {
     FLOOR,
-    WALL
+    WALL,
+    STAIRCASE
 };
 
 enum Direction {
@@ -29,6 +30,7 @@ private:
     std::vector<std::vector<TileType>> tiles;
     SDL_Texture* floorTile;
     SDL_Texture* wallTile;
+    SDL_Texture* staircaseTile;
     // Generate random room dimensions
     void generateDimensions();
     // Initialize the tile grid
@@ -53,6 +55,7 @@ public:
     int getHeight() const { return this->height; }
     SDL_Texture* getFloor() { return this->floorTile; }
     SDL_Texture* getWall() { return this->wallTile; }
+    SDL_Texture* getStaircase() { return this->staircaseTile; }
     // Get tile at position
     TileType getTileAt(int x, int y) const;
 
@@ -62,6 +65,7 @@ public:
     void createDoorway(Direction dir);
     std::pair<int, int> getDoorwayPosition(Direction dir);
     void connect(Direction dir, Room* room);
+    void placeStaircase(int x, int y);
 
     //check if tile is walkable
     bool checkWalkable(int x, int y) const;

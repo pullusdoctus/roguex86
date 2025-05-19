@@ -115,9 +115,15 @@ void Renderer::renderRoom(Room* room) {
         TILE_SIZE
       };
       // Draw the appropriate texture based on tile type
-      auto tile = (room->getTileAt(x, y) == FLOOR)
-        ? room->getFloor()
-        : room->getWall();
+      SDL_Texture* tile;
+      TileType tType = room->getTileAt(x, y);
+      if (tType == FLOOR) {
+        tile = room->getFloor();
+      } else if (tType == WALL) {
+        tile = room->getWall();
+      } else {
+        tile = room->getStaircase();
+      }
       SDL_RenderCopy(this->renderer, tile, NULL, &dst);
     }
   }

@@ -86,16 +86,25 @@ bool Room::loadTextures(SDL_Renderer* renderer) {
   }
   this->wallTile = SDL_CreateTextureFromSurface(renderer, wallSurface);
   SDL_FreeSurface(wallSurface);
-  return this->floorTile && this->wallTile;
+  // Load staircase texture
+  SDL_Surface* stairSurface = IMG_Load(STAIRCASE_TILE);
+  if (!stairSurface) {
+    std::cerr << "Failed to load staircase texture: " << SDL_GetError()
+      << std::endl;
+    return false;
+  }
+  this->staircaseTile = SDL_CreateTextureFromSurface(renderer, stairSurface);
+  SDL_FreeSurface(stairSurface);
+  return this->floorTile && this->wallTile && this->staircaseTile;
 }
 
 void Room::generate(SDL_Renderer* renderer) {
   // Generate room dimensions
-  generateDimensions();
+  this->generateDimensions();
   // Initialize tiles
-  initializeTiles();
+  this->initializeTiles();
   // Load textures
-  if (!loadTextures(renderer)) {
+  if (!this->loadTextures(renderer)) {
     std::cerr << "Failed to load room textures" << std::endl;
   }
 }
@@ -153,6 +162,10 @@ void Room::connect(Direction dir, Room* room) {
   } else {
     this->east = room;
   }
+}
+
+void Room::placeStaircase(int x, int y) {
+  this->tiles[y][x] = STAIRCASE;
 }
 
 bool Room::checkWalkable(int x, int y) const

@@ -53,6 +53,9 @@ void Level::generateFloor(SDL_Renderer* renderer) {
   if (!this->connectRooms()) {
     std::cerr << "Error: Room connection failed" << std::endl;
   }
+  if (!this->placeStaircase()) {
+    std::cerr << "Error: Staircase placing failed" << std::endl;
+  }
 }
 
 bool Level::connectRooms() {
@@ -161,4 +164,35 @@ void Level::moveRoom(Room* nextRoom) {
       return;
     }
   }
+}
+
+bool Level::placeStaircase() {
+  // pick a room randomly
+  int staircaseRoomIndex = rand_between(0, rooms.size());
+  Room* staircaseRoom = this->rooms[staircaseRoomIndex];
+  int roomWidth = staircaseRoom->getWidth();
+  int roomHeight = staircaseRoom->getHeight();
+  // to avoid placing staircases in front of doorways
+  int prohibitedX = roomWidth / 2;
+  int prohibitedY = roomHeight / 2;
+  for (int x = 1; x < roomWidth - 1; ++x) {
+    // ignore if the current tile is in front of a doorway
+    if (x == prohibitedX) continue;
+    bool placeStaircase;
+    for (int y = 1; y < roomHeight - 1; ++y) {
+      // ignore if the current tile is in front of a doorway
+      if (y == prohibitedY) continue;
+      // 30% chance this tile gets a staircase
+      placeStaircase = (rand_between(0, 100) <= 30) ? true : false;
+      // place a staircase if the tile was chosen
+      // OR if it's the last tile in the room
+      if (placeStaircase || (x == roomWidth - 2 && y == roomHeight - 2)) {
+        staircaseRoom->placeStaircase(x, y);
+        placeStaircase = true;  // in case it's the last tile
+        break;
+      }
+    }
+    if (placeStaircase) return true;  // staircase placed, stop looking
+  }
+  return false;
 }
