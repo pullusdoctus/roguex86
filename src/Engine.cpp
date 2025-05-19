@@ -100,7 +100,7 @@ int Engine::run() {
 void Engine::runGame(bool& quit) {
   this->currentFloor->generateFloor(this->renderer->getSDLRenderer());
   this->initializePlayer();
-  this->placePlayerInRoom(false, NORTH);  // side is irrelevant here
+  this->placePlayerInRoom(false, NONE);  // side is irrelevant here
   while (this->gameState == IN_GAME && !quit) {
     if (this->inputHandler->processEvents()) {
       quit = true;
@@ -117,6 +117,7 @@ void Engine::gameOver(bool& quit) {
 
 void Engine::victory(bool& quit) {
   // TODO:show victory screen
+  std::cout << "VICTORY" << std::endl;
   quit = true;
 }
 
@@ -271,7 +272,7 @@ void Engine::handleInGame(bool& quit) {
   Room* currentRoom = this->currentFloor->getCurrentRoom();
   // check if the player reached a doorway
   // check what doorway was reached
-  if (!this->justMovedRooms) {
+  if (!this->justMovedRooms) {  // if the player hasn't just moved to a new room
     for (Direction dir = NORTH; dir <= EAST; ++dir) {
       // if a room was found in this direction
       if (currentRoom->getAdjacentRoom(dir)) {
@@ -299,6 +300,24 @@ void Engine::handleInGame(bool& quit) {
     }
     if (!stillInDoorway) {
       this->justMovedRooms = false;
+    }
+  }
+  // check if the player reached a staircase
+  // check if the staircase is in the current floor
+  if (currentRoom == this->currentFloor->getStaircaseRoom()) {
+    // check if the player is on the staircase tile
+    auto [x, y] = this->currentFloor->getStaircasePosition();
+    if (this->player->x == x && this->player->y == y) {
+      // go to the next floor
+      this->currentFloor->advance(this->renderer->getSDLRenderer());
+      --this->remainingLevels;
+      // if the player just left the last level
+      if (this->remainingLevels == 0) {
+        this->gameState = VICTORY;
+        return;  // go to victory screen
+      }
+      // else, place the player in the middle of the next floor
+      this->placePlayerInRoom(false, NONE);
     }
   }
   this->renderer->renderGame(currentRoom, this->player);

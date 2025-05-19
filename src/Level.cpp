@@ -7,7 +7,7 @@
 #include <random>
 #include <stdexcept>
 
-Level::Level() : roomCount(0), currentRoom(0) {
+Level::Level() : roomCount(0), currentRoom(0), staircaseX(-1), staircaseY (-1) {
 }
 
 Level::~Level() {
@@ -24,10 +24,6 @@ Room Level::getRoom(int room) {
   throw std::out_of_range("Room index out of bounds");
 }
 
-Room* Level::getCurrentRoom() {
-  return this->currentRoom;
-}
-
 void Level::addRoom(Room* room) {
   if (!this->currentRoom) this->currentRoom = room;
   this->rooms.push_back(room);
@@ -35,10 +31,6 @@ void Level::addRoom(Room* room) {
 
 void Level::setRoomCount(int newRoomCount) {
   this->roomCount = newRoomCount;
-}
-
-int Level::getRoomCount() {
-  return this->roomCount;
 }
 
 void Level::generateFloor(SDL_Renderer* renderer) {
@@ -56,6 +48,16 @@ void Level::generateFloor(SDL_Renderer* renderer) {
   if (!this->placeStaircase()) {
     std::cerr << "Error: Staircase placing failed" << std::endl;
   }
+}
+
+void Level::advance(SDL_Renderer* renderer) {
+  this->roomCount = 0;
+  this->currentRoom = nullptr;
+  this->staircaseRoom = nullptr;
+  this->staircaseX = -1;
+  this->staircaseY = -1;
+  this->rooms.clear();
+  this->generateFloor(renderer);
 }
 
 bool Level::connectRooms() {
@@ -168,10 +170,10 @@ void Level::moveRoom(Room* nextRoom) {
 
 bool Level::placeStaircase() {
   // pick a room randomly
-  int staircaseRoomIndex = rand_between(0, rooms.size());
-  Room* staircaseRoom = this->rooms[staircaseRoomIndex];
-  int roomWidth = staircaseRoom->getWidth();
-  int roomHeight = staircaseRoom->getHeight();
+  int staircaseRoomIndex = rand_between(0, rooms.size() - 1);
+  this->staircaseRoom = this->rooms[staircaseRoomIndex];
+  int roomWidth = this->staircaseRoom->getWidth();
+  int roomHeight = this->staircaseRoom->getHeight();
   // to avoid placing staircases in front of doorways
   int prohibitedX = roomWidth / 2;
   int prohibitedY = roomHeight / 2;
@@ -187,7 +189,9 @@ bool Level::placeStaircase() {
       // place a staircase if the tile was chosen
       // OR if it's the last tile in the room
       if (placeStaircase || (x == roomWidth - 2 && y == roomHeight - 2)) {
-        staircaseRoom->placeStaircase(x, y);
+        this->staircaseRoom->placeStaircase(x, y);
+        this->staircaseX = x;
+        this->staircaseY = y;
         placeStaircase = true;  // in case it's the last tile
         break;
       }
@@ -195,4 +199,8 @@ bool Level::placeStaircase() {
     if (placeStaircase) return true;  // staircase placed, stop looking
   }
   return false;
+}
+
+std::pair<int, int> Level::getStaircasePosition() {
+  return {this->staircaseX, this->staircaseY};
 }
