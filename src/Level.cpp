@@ -67,12 +67,13 @@ bool Level::connectRooms() {
   // check if a room has adjacent rooms
   for (size_t i = 0; i < rooms.size(); ++i) {
     Room* room = rooms[i];
-    for (Direction dir = NORTH; dir <= EAST; ++dir) {
-      if (room->getAdjacentRoom(dir) != nullptr) {
-        roomConnected[i] = true;
-        break;
-      }
-    }
+    void* adjacentRooms[4] = {
+      room->getAdjacentRoom(NORTH),
+      room->getAdjacentRoom(SOUTH),
+      room->getAdjacentRoom(WEST),
+      room->getAdjacentRoom(EAST)
+    };
+    if (_hasAnyConnection(adjacentRooms, 4)) roomConnected[i] = true;
   }
   // connect rooms without connections
   bool changeMade;
@@ -82,63 +83,19 @@ bool Level::connectRooms() {
   do {
     changeMade = false;
     // try to connect each room at least once
-    for (size_t roomAIndex = 0; roomAIndex < rooms.size(); ++roomAIndex) {
+    for (size_t roomAIndex = 0;
+    roomAIndex < this->rooms.size(); ++roomAIndex) {
       if (roomConnected[roomAIndex]) continue;  // ignore rooms w/ connections
-      // connect to other rooms
-      Room* roomA = rooms[roomAIndex];
-      bool roomAConnected = false;
-      // get a random direction to try and connect from
-      std::random_device rd;
-      std::mt19937 g(rd());
-      std::shuffle(directions.begin(), directions.end(), g);
-      // to check if this direction has already been tried
-      std::vector<Direction> tried;
-      // check all four directions
-      for (Direction dir : directions) {
-        // don't connect on a direction with an existing connection
-        if (roomA->getAdjacentRoom(dir) != nullptr) continue;
-        tried.push_back(dir);
-        // find a room to connect to
-        for (size_t roomBIndex = 0; roomBIndex < rooms.size() &&
-        !roomAConnected; ++roomBIndex) {
-          if (roomAIndex == roomBIndex) continue;  // don't connect with itself
-          Room* roomB = rooms[roomBIndex];
-          Direction oppDir = roomA->getOppositeDirection(dir);
-          // skip if room B has a connection in the opposite direction
-          if (roomB->getAdjacentRoom(oppDir) != nullptr) continue;
-          // connect the rooms
-          roomA->connect(dir, roomB);
-          roomB->connect(oppDir, roomA);
-          // create doorways
-          roomA->createDoorway(dir);
-          roomB->createDoorway(oppDir);
-
-          roomAConnected = true;
-          roomConnected[roomAIndex] = true;
-          roomConnected[roomBIndex] = true;
-          changeMade = true;
-        }
-      }
-      // if a connection couldn't be made for room A
-      if (!roomAConnected) {
-        // double check it doesn't have connections
-        bool hasConnections = false;
-        for (Direction dir = NORTH; dir <= EAST; ++dir) {
-          if (roomA->getAdjacentRoom(dir)) {
-            hasConnections = true;
-            break;
-          }
-        }
-        // after double checking, if it actually isn't connected to another room
-        if (!hasConnections) {
-          // delete the room from memory
-          delete this->rooms[roomAIndex];
-          this->rooms.erase(this->rooms.begin() + roomAIndex);
-          roomConnected.erase(roomConnected.begin() + roomAIndex);
-          roomAIndex--;  // adjust index after removal
-          roomsRemoved = true;
-          changeMade = true;
-        }
+      // try to connect to another room
+      if (tryConnectRooms(roomAIndex, roomConnected, directions))
+        changeMade = true;
+      else {
+        // room not connected, delete it
+        this->rooms.erase(this->rooms.begin() + roomAIndex);
+        roomConnected.erase(roomConnected.begin() + roomAIndex);
+        --roomAIndex;
+        roomsRemoved = true;
+        changeMade = true;
       }
     }
   } while (changeMade);
@@ -150,6 +107,48 @@ bool Level::connectRooms() {
     }
   }
   return true;
+}
+
+bool Level::tryConnectRooms(size_t roomAIndex,
+                            std::vector<bool>& roomConnected,
+                            std::vector<Direction>& directions) {
+  Room* roomA = rooms[roomAIndex];
+  bool roomAConnected = false;
+  // shuffle directions
+  shuffleDirectionArray(directions);
+  // try each direction
+  for (Direction dir : directions) {
+    // don't connect on a direction with an existing connection
+    if (roomA->getAdjacentRoom(dir)) continue;
+    // find a room to connect to
+    for (size_t roomBIndex = 0;
+    roomBIndex < rooms.size() && !roomAConnected; ++roomBIndex) {
+      if (roomAIndex == roomBIndex) continue;  // don't connect with itself
+      Room* roomB = rooms[roomBIndex];
+      // get opposite direction
+      Direction oppDir = static_cast<Direction>(_getOppositeDirection(dir));
+      // skip if room B has a connection in the opposite direction
+      if (roomB->getAdjacentRoom(oppDir) != nullptr) continue;
+      // connect the rooms
+      roomA->connect(dir, roomB);
+      roomB->connect(oppDir, roomA);
+      // create doorways
+      roomA->createDoorway(dir);
+      roomB->createDoorway(oppDir);
+      // update flags
+      roomAConnected = true;
+      roomConnected[roomAIndex] = true;
+      roomConnected[roomBIndex] = true;
+    }
+    if (roomAConnected) break;
+  }
+  return roomAConnected;
+}
+
+void Level::shuffleDirectionArray(std::vector<Direction>& directions) {
+  static unsigned int seed = _seed();
+  _shuffleDirections(reinterpret_cast<int*>(directions.data()),
+                     directions.size(), seed);
 }
 
 bool Level::roomHasConnection(int i) {

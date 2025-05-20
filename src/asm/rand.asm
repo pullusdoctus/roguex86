@@ -1,5 +1,5 @@
-global rand_between:
-
+global rand_between
+global _seed
 ; int rand_between(int64_t lower_bound, int64_t upper_bound)
 rand_between:
   ; store the bounds in registers
@@ -48,4 +48,10 @@ rand_between:
   pop rcx
   pop rbx
   pop rbp
+  ret
+
+; generate a usable 32-bit seed
+_seed:
+  rdtsc
+  xor edx, eax
   ret

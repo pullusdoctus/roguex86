@@ -26,6 +26,10 @@ class Level {
     void advance(SDL_Renderer* renderer);
 
     bool connectRooms();
+    bool tryConnectRooms(size_t roomAIndex,
+                         std::vector<bool>& roomConnected,
+                         std::vector<Direction>& directions);
+    void shuffleDirectionArray(std::vector<Direction>& directions);
     bool roomHasConnection(int i);
     void moveRoom(Room* nextRoom);
 
