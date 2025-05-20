@@ -174,31 +174,57 @@ bool Level::placeStaircase() {
   this->staircaseRoom = this->rooms[staircaseRoomIndex];
   int roomWidth = this->staircaseRoom->getWidth();
   int roomHeight = this->staircaseRoom->getHeight();
-  // to avoid placing staircases in front of doorways
-  int prohibitedX = roomWidth / 2;
-  int prohibitedY = roomHeight / 2;
   for (int x = 1; x < roomWidth - 1; ++x) {
-    // ignore if the current tile is in front of a doorway
-    if (x == prohibitedX) continue;
-    bool placeStaircase;
     for (int y = 1; y < roomHeight - 1; ++y) {
-      // ignore if the current tile is in front of a doorway
-      if (y == prohibitedY) continue;
+      // validate staircase position to avoid placing in front of doorways
+      if (!isValidStaircasePosition(x, y, roomWidth, roomHeight)) {
+        continue;  // not a valid position, keep looking
+      }
+      // avoid placing the staircase too close to a doorway
+      if (isDoorwayNearby(x, y)) {
+        continue;
+      }
       // 30% chance this tile gets a staircase
-      placeStaircase = (rand_between(0, 100) <= 30) ? true : false;
+      bool placeStaircase = (rand_between(0, 100) <= 30) ? true : false;
       // place a staircase if the tile was chosen
       // OR if it's the last tile in the room
       if (placeStaircase || (x == roomWidth - 2 && y == roomHeight - 2)) {
-        this->staircaseRoom->placeStaircase(x, y);
-        this->staircaseX = x;
-        this->staircaseY = y;
-        placeStaircase = true;  // in case it's the last tile
-        break;
+        if (tryPlaceStaircase(x, y)) {
+          return true;
+        }
       }
     }
-    if (placeStaircase) return true;  // staircase placed, stop looking
   }
-  return false;
+  // if the staircase wasn't placed, try to place it in the middle of the room
+  return tryPlaceStaircase(roomWidth / 2, roomHeight / 2);
+}
+
+bool Level::isValidStaircasePosition(int x, int y, int width, int height) {
+  // skip if the current tile is in front of a doorway
+  int doorwayX = width / 2;
+  int doorwayY = height / 2;
+  if (x == doorwayX || y == doorwayY) return false;
+  // validate position with asm helper
+  return _checkValidStaircasePosition(x, y, width, height);
+}
+
+bool Level::isDoorwayNearby(int x, int y) {
+  if (!staircaseRoom) return true;
+  int roomWidth = staircaseRoom->getWidth();
+  int roomHeight = staircaseRoom->getHeight();
+  int doorwayX = roomWidth / 2;
+  int doorwayY = roomHeight / 2;
+  // check doorway proximity with asm helper
+  return _isDoorwayProximity(x, y, doorwayX, doorwayY,
+                             DOORWAY_PROXIMITY_THRESHOLD);
+}
+
+bool Level::tryPlaceStaircase(int x, int y) {
+  if (!staircaseRoom) return false;
+  this->staircaseRoom->placeStaircase(x, y);
+  this->staircaseX = x;
+  this->staircaseY = y;
+  return true;
 }
 
 std::pair<int, int> Level::getStaircasePosition() {

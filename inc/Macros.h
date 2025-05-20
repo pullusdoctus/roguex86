@@ -42,6 +42,9 @@
 #define MIN_ROOM_COUNT 3
 #define MAX_ROOM_COUNT 6
 
+// Thresholds
+#define DOORWAY_PROXIMITY_THRESHOLD 2
+
 // Key Scancodes
 #define ESC SDL_SCANCODE_ESCAPE
 #define W_KEY SDL_SCANCODE_W

@@ -31,5 +31,8 @@ class Level {
 
     bool placeStaircase();
     Room* getStaircaseRoom() { return this->staircaseRoom; }
+    bool isValidStaircasePosition(int x, int y, int width, int height);
+    bool isDoorwayNearby(int x, int y);
+    bool tryPlaceStaircase(int x, int y);
     std::pair<int, int> getStaircasePosition();
 };
