@@ -455,7 +455,7 @@ void Renderer::renderCombat(Player* player, Enemy* enemy, int hoveredCommand) {
   // layout constants
   int texW, texH;
   const int barWidth = 200, barHeight = 20;
-  const int margin = 20;
+  const int margin = 40;
   // find what the screen height's third is
   int third = this->height / 3;
   // clear screen
@@ -464,11 +464,12 @@ void Renderer::renderCombat(Player* player, Enemy* enemy, int hoveredCommand) {
   // draw player and enemy sprites
   int spriteHeight = third - 2 * margin;
   int spriteWidth = spriteHeight;
-  enemy->rect = {margin, third + margin, spriteWidth, spriteHeight};
-  player->rect = {this->width - spriteWidth - margin, third + margin,
+  enemy->rect = {2 * margin, third + margin, spriteWidth, spriteHeight};
+  player->rect = {this->width - spriteWidth - 2 * margin, third + margin,
     spriteWidth, spriteHeight};
   SDL_RenderCopy(this->renderer, enemy->sprite, nullptr, &enemy->rect);
-  SDL_RenderCopy(this->renderer, player->sprite, nullptr, &player->rect);
+  SDL_RenderCopyEx(this->renderer, player->sprite, nullptr, &player->rect,
+                   0, nullptr, SDL_FLIP_HORIZONTAL);
   // draw health bars
   int barOffset = third;  // top third
   this->renderHealthBar(enemy->rect.x, barOffset, barWidth, barHeight,
@@ -478,10 +479,14 @@ void Renderer::renderCombat(Player* player, Enemy* enemy, int hoveredCommand) {
   // draw command box
   int commandY = 2 * third + margin;
   SDL_QueryTexture(commandTitle, nullptr, nullptr, &texW, &texH);
+  int commandBoxHeight = texH + 2 * margin;
+  SDL_Rect commandBox = {0, commandY - margin, this->width, commandBoxHeight};
+  SDL_SetRenderDrawColor(this->renderer, 0, 0, 0, 255);
+  SDL_RenderFillRect(this->renderer, &commandBox);
   SDL_Rect titleDst = {margin, commandY, texW, texH};
   SDL_RenderCopy(this->renderer, commandTitle, nullptr, &titleDst);
   // space out commands
-  int spacing = 20;
+  int spacing = 30;
   int totalTextWidth = 0;
   int commandWidths[labelCount];
   for (int i = 0; i < labelCount; ++i) {
