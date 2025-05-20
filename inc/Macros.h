@@ -51,6 +51,7 @@
 
 // Key Scancodes
 #define ESC SDL_SCANCODE_ESCAPE
+#define ENTER SDL_SCANCODE_RETURN
 #define W_KEY SDL_SCANCODE_W
 #define S_KEY SDL_SCANCODE_S
 #define A_KEY SDL_SCANCODE_A

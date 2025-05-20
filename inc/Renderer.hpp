@@ -30,6 +30,9 @@ enum CombatMenuButtonID {
   RUN
 };
 
+CombatMenuButtonID& operator++(CombatMenuButtonID& cmd);
+CombatMenuButtonID& operator--(CombatMenuButtonID& cmd);
+
 enum FontIDs {
   MAIN_MENU_FONT = 0,
   SUBTITLE_FONT,

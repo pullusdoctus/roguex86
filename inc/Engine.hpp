@@ -63,7 +63,7 @@ class Engine {
     void handleDifficultyMenuInput();
     void handleInstructionsMenuInput();
     void handleInGame(bool& quit);
-    void handleCombat();
+    void handleCombat(CombatMenuButtonID& command);
 
     void generateRooms();
     void initializePlayer();

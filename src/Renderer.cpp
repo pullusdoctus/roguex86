@@ -4,6 +4,18 @@
 #include <iostream>
 #include <Macros.h>
 
+CombatMenuButtonID& operator++(CombatMenuButtonID& cmd) {
+  if (cmd == RUN) cmd = ATTACK;
+  else cmd = static_cast<CombatMenuButtonID>(static_cast<int>(cmd) + 1);
+  return cmd;
+}
+
+CombatMenuButtonID& operator--(CombatMenuButtonID& cmd) {
+  if (cmd == ATTACK) cmd = RUN;
+  else cmd = static_cast<CombatMenuButtonID>(static_cast<int>(cmd) - 1);
+  return cmd;
+}
+
 Renderer::Renderer() : window(nullptr), renderer(nullptr),
   width(WINDOW_WIDTH), height(WINDOW_HEIGHT) {
   this->menuItemBounds.resize(11);

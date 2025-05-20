@@ -125,7 +125,7 @@ void Engine::startCombat(bool& quit) {
                            SLIME_SPRITE, 0, 0, SLIME_HEALTH);
   while (this->gameState == COMBAT) {
     this->renderer->renderCombat(this->player, slime, combatCommand);
-    this->handleCombat();
+    this->handleCombat(combatCommand);
   }
   delete slime;
 }
@@ -292,8 +292,28 @@ void Engine::handleInGame(bool& quit) {
   if (combatTriggered) this->gameState = COMBAT;
 }
 
-void Engine::handleCombat() {
-  if (this->inputHandler->processEvents()) {
+void Engine::handleCombat(CombatMenuButtonID& command) {
+  this->inputHandler->processEvents();
+  if (this->inputHandler->keyPressed(A_KEY)) {
+    --command;
+  } else if (this->inputHandler->keyPressed(D_KEY)) {
+    ++command;
+  } else if (this->inputHandler->keyPressed(ENTER)) {
+    switch (command) {
+      case ATTACK:
+        std::cout << "ATTACK" << std::endl;
+        break;
+      case OBJECTS:
+        std::cout << "OBJECTS" << std::endl;
+        break;
+      case DEFEND:
+        std::cout << "DEFEND" << std::endl;
+        break;
+      case RUN:
+        std::cout << "RUN" << std::endl;
+        this->gameState = IN_GAME;
+        break;
+    }
   }
   // TODO: Implement combat logic
   // TODO: return to room if enemy loses all health
