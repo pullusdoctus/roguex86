@@ -8,9 +8,11 @@ class Character {
     SDL_Texture* sprite;
     SDL_Rect rect;
     int step;
+    int hp;
+    int maxHp;
 
     Character(SDL_Renderer* renderer, const std::string& spritePath,
-              int startX, int startY);
+              int startX, int startY, int hp);
     ~Character();
 
     void draw(SDL_Renderer* renderer);

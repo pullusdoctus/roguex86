@@ -15,6 +15,14 @@
 #define FONT_SIZE_PAUSE_MENU 12
 // Sprite definitions
 #define PLAYER_SPRITE "./rsc/img/sprites/player.png"
+#define SLIME_SPRITE "./rsc/img/sprites/slime.png"
+#define BAT_SPRITE "./rsc/img/sprites/bat.png"
+#define SCORPION_SPRITE "./rsc/img/sprites/scorpion.png"
+// Character stat definitions
+#define PLAYER_HEALTH 40
+#define SLIME_HEALTH 15
+#define BAT_HEALTH 25
+#define SCORPION_HEALTH 25
 // Tile and room definitions
 #define TILE_SIZE 64
 #define MIN_ROOM_SIZE 5

@@ -4,8 +4,8 @@
 #include <Macros.h>
 
 Character::Character(SDL_Renderer* renderer, const std::string& imagePath,
-                     int startX, int startY)
-    : sprite(nullptr), step(TILE_SIZE) {
+                     int startX, int startY, int hp)
+    : sprite(nullptr), step(TILE_SIZE), hp(hp), maxHp(hp) {
   SDL_Surface* surface = IMG_Load(imagePath.c_str());
   if (!surface) {
       SDL_Log("Error al cargar imagen: %s", IMG_GetError());
