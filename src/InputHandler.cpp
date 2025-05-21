@@ -203,7 +203,6 @@ bool InputHandler::handlePlayerMovement(Player *player, Room *room, int difficul
   if (moved) {
     int roll = dist(gen); // Roll a number between 1 and 100
     if (roll <= chance) {     // 10% of chance to trigger combat
-      SDL_Log("¡Combate iniciado!");
       combat = true;    // Trigger combat
     }
   }

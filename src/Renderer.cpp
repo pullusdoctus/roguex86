@@ -1,14 +1,25 @@
 #include <Renderer.hpp>
 
+#include <algorithm>
 #include <iostream>
 #include <Macros.h>
 
+CombatMenuButtonID& operator++(CombatMenuButtonID& cmd) {
+  if (cmd == RUN) cmd = ATTACK;
+  else cmd = static_cast<CombatMenuButtonID>(static_cast<int>(cmd) + 1);
+  return cmd;
+}
+
+CombatMenuButtonID& operator--(CombatMenuButtonID& cmd) {
+  if (cmd == ATTACK) cmd = RUN;
+  else cmd = static_cast<CombatMenuButtonID>(static_cast<int>(cmd) - 1);
+  return cmd;
+}
+
 Renderer::Renderer() : window(nullptr), renderer(nullptr),
   width(WINDOW_WIDTH), height(WINDOW_HEIGHT) {
-  SDL_Rect temp;
-  for (int i = 0; i < 11; ++i) {
-    menuItemBounds.push_back(temp);
-  }
+  this->menuItemBounds.resize(11);
+  this->combatItemBounds.resize(4);
 }
 
 Renderer::~Renderer() {
@@ -437,6 +448,114 @@ void Renderer::showInstructions() {
 void Renderer::clearScreen() {
   SDL_SetRenderDrawColor(this->renderer, 0, 0, 0, 255);
   SDL_RenderClear(this->renderer);
+ }
+
+void Renderer::renderCombat(Player* player, Enemy* enemy, int hoveredCommand) {
+  // text colors
+  SDL_Color textColor = {255, 255, 255, 255};  // white
+  SDL_Color highlightColor = {255, 255, 0, 255};  // yellow
+  // command box
+  const char* labels[4] = {"attack", "objects", "defend", "run"};
+  const int labelCount = 4;
+  SDL_Texture* commandTitle =
+    renderText("ENEMY", MAIN_MENU_FONT, textColor);
+  SDL_Texture* commandOptions[labelCount];
+  for (int i = 0; i < labelCount; ++i) {
+    commandOptions[i] =
+      renderText(labels[i], MAIN_MENU_FONT,
+                 (i == hoveredCommand) ? highlightColor : textColor);
+  }
+  // exit if some rendering failed
+  if (!commandTitle ||
+    std::any_of(commandOptions, commandOptions + labelCount,
+                [](SDL_Texture* t) { return !t; })) return;
+  // layout constants
+  int texW, texH;
+  const int barWidth = 200, barHeight = 20;
+  const int margin = 40;
+  // find what the screen height's third is
+  int third = this->height / 3;
+  // clear screen
+  SDL_SetRenderDrawColor(this->renderer, 0, 0, 0, 255);
+  SDL_RenderClear(this->renderer);
+  // draw player and enemy sprites
+  int spriteHeight = third - 2 * margin;
+  int spriteWidth = spriteHeight;
+  enemy->rect = {2 * margin, third + margin, spriteWidth, spriteHeight};
+  player->rect = {this->width - spriteWidth - 2 * margin, third + margin,
+    spriteWidth, spriteHeight};
+  SDL_RenderCopy(this->renderer, enemy->sprite, nullptr, &enemy->rect);
+  SDL_RenderCopyEx(this->renderer, player->sprite, nullptr, &player->rect,
+                   0, nullptr, SDL_FLIP_HORIZONTAL);
+  // draw health bars
+  int barOffset = third;  // top third
+  this->renderHealthBar(enemy->rect.x, barOffset, barWidth, barHeight,
+                        enemy->hp, enemy->maxHp);
+  this->renderHealthBar(player->rect.x + (spriteWidth - barWidth), barOffset,
+                        barWidth, barHeight, player->getHealth(), player->maxHp);
+  // draw command box
+  int commandY = 2 * third + margin;
+  SDL_QueryTexture(commandTitle, nullptr, nullptr, &texW, &texH);
+  int commandBoxHeight = texH + 2 * margin;
+  SDL_Rect commandBox = {0, commandY - margin, this->width, commandBoxHeight};
+  SDL_SetRenderDrawColor(this->renderer, 0, 0, 0, 255);
+  SDL_RenderFillRect(this->renderer, &commandBox);
+  SDL_Rect titleDst = {margin, commandY, texW, texH};
+  SDL_RenderCopy(this->renderer, commandTitle, nullptr, &titleDst);
+  // space out commands
+  int spacing = 30;
+  int totalTextWidth = 0;
+  int commandWidths[labelCount];
+  for (int i = 0; i < labelCount; ++i) {
+    SDL_QueryTexture(commandOptions[i], nullptr, nullptr, &commandWidths[i],
+                     &texH);
+    totalTextWidth += commandWidths[i];
+  }
+  totalTextWidth += spacing * (labelCount - 1);
+  int startX = this->width - totalTextWidth - margin;
+  // draw commands
+  for (int i = 0, x = startX; i < labelCount; ++i) {
+    SDL_Rect dst = {x, commandY, commandWidths[i], texH};
+    SDL_RenderCopy(this->renderer, commandOptions[i], nullptr, &dst);
+    storeCombatItemBounds(static_cast<CombatMenuButtonID>(ATTACK + i), dst);
+    x += commandWidths[i] + spacing;
+  }
+  SDL_RenderPresent(this->renderer);
+  // cleanup
+  SDL_DestroyTexture(commandTitle);
+  for (int i = 0; i < labelCount; ++i) {
+    SDL_DestroyTexture(commandOptions[i]);
+  }
+}
+
+void Renderer::renderHealthBar(int x, int y, int w, int h, int hp, int maxHp) {
+  float ratio = static_cast<float>(hp) / maxHp;
+  SDL_Color barColor;
+  if (ratio < 0.1f) barColor = {255, 0, 0, 255};      // rojo
+  else if (ratio < 0.3f) barColor = {255, 255, 0, 255}; // amarillo
+  else barColor = {0, 255, 0, 255};                    // verde
+
+  // barra de fondo gris
+  SDL_Rect bg = {x, y, w, h};
+  SDL_SetRenderDrawColor(this->renderer, 50, 50, 50, 255);
+  SDL_RenderFillRect(this->renderer, &bg);
+
+  // barra de vida
+  SDL_Rect fg = {x, y, static_cast<int>(w * ratio), h};
+  SDL_SetRenderDrawColor(this->renderer, barColor.r, barColor.g, barColor.b, 255);
+  SDL_RenderFillRect(this->renderer, &fg);
+
+  // Mostrar texto "HP actual / HP máxima"
+  SDL_Color textColor = {255, 255, 255, 255};
+  std::string hpText = std::to_string(hp) + " / " + std::to_string(maxHp);
+  SDL_Texture* hpTexture = renderText(hpText.c_str(), MAIN_MENU_FONT, textColor);
+  if (hpTexture) {
+    int texW, texH;
+    SDL_QueryTexture(hpTexture, nullptr, nullptr, &texW, &texH);
+    SDL_Rect dst = {x + (w - texW) / 2, y - texH - 4, texW, texH}; // encima de la barra
+    SDL_RenderCopy(this->renderer, hpTexture, nullptr, &dst);
+    SDL_DestroyTexture(hpTexture);
+  }
 }
 
 void Renderer::storeMenuItemBounds(MainMenuButtonID id, const SDL_Rect& bounds) {
@@ -445,4 +564,8 @@ void Renderer::storeMenuItemBounds(MainMenuButtonID id, const SDL_Rect& bounds) 
 
 const SDL_Rect& Renderer::getMenuItemBounds(MainMenuButtonID id) const {
   return menuItemBounds[id];
+}
+
+void Renderer::storeCombatItemBounds(CombatMenuButtonID id, const SDL_Rect& bounds) {
+  combatItemBounds[id] = bounds;
 }

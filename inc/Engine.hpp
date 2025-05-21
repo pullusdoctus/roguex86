@@ -24,6 +24,18 @@ enum Difficulty {
   HARD
 };
 
+enum RoomSide {
+  LEFT,
+  RIGHT,
+  UP,
+  DOWN
+};
+
+enum EnemyTypes {
+  SLIME,
+  BAT,
+  SCORPION
+};
 class Engine {
   private:
     Renderer* renderer;
@@ -41,6 +53,7 @@ class Engine {
     bool newGame;
 
     void runGame(bool& quit);
+    void startCombat(bool& quit);
     void gameOver(bool& quit);
     void victory(bool& quit);
 
@@ -51,6 +64,7 @@ class Engine {
     void handleDifficultyMenuInput();
     void handleInstructionsMenuInput();
     void handleInGame(bool& quit);
+    void handleCombat(CombatMenuButtonID& command, Enemy* enemy, Player* player);
 
     void initializePlayer();
     void placePlayerInRoom(bool edge, Direction dir);
