@@ -350,10 +350,20 @@ void Engine::handleCombat(CombatMenuButtonID& command, Enemy* enemy, Player* pla
         std::cout << "DEFEND" << std::endl;
         player->defend();
         break;
-      case RUN:
+      case RUN: {
         std::cout << "RUN" << std::endl;
-        this->gameState = IN_GAME;
-        return;
+        std::mt19937 rng(std::random_device{}());
+        std::uniform_int_distribution<int> dist(1, 100);
+        int chance = dist(rng);
+        if (chance <= 20) {
+          std::cout << "RUN failed!" << std::endl;
+        } else {
+          std::cout << "RUN succeeded!" << std::endl;
+          this->gameState = IN_GAME;
+          return;
+        }
+        break;
+      }
     }
 
     // Acción del enemigo después de que el jugador actuó
