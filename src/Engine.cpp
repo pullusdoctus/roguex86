@@ -102,14 +102,19 @@ int Engine::run() {
 }
 
 void Engine::runGame(bool& quit) {
-  this->currentFloor->generateFloor(this->renderer->getSDLRenderer());
-  this->initializePlayer();
-  this->placePlayerInRoom(false, NONE);  // side is irrelevant here
+  if (newGame) {
+    this->currentFloor->generateFloor(this->renderer->getSDLRenderer());
+    this->initializePlayer();
+    this->placePlayerInRoom(false, NONE);  // side is irrelevant here
+    this->newGame = false;
+  }
   while (this->gameState == IN_GAME && !quit) {
     if (this->inputHandler->processEvents()) {
       quit = true;
       continue;
     }
+    Room* currentRoom = this->currentFloor->getCurrentRoom();
+    this->renderer->renderGame(currentRoom, this->player);
     this->handleInGame(quit);
   }
 }
@@ -315,7 +320,10 @@ void Engine::handleInGame(bool& quit) {
 
   int combatTriggered = this->inputHandler->handlePlayerMovement(
     this->player, this->currentFloor->getCurrentRoom(), this->difficulty);
-  if (combatTriggered) this->gameState = COMBAT;
+  if (combatTriggered) {
+    this->gameState = COMBAT;
+    return;
+  }
   Room* currentRoom = this->currentFloor->getCurrentRoom();
   // check if the player reached a doorway
   // check what doorway was reached
@@ -348,26 +356,26 @@ void Engine::handleInGame(bool& quit) {
     if (!stillInDoorway) {
       this->justMovedRooms = false;
     }
-    // check if the player reached a staircase
-    // check if the staircase is in the current floor
-    if (currentRoom == this->currentFloor->getStaircaseRoom()) {
-    // check if the player is on the staircase tile
-    auto [x, y] = this->currentFloor->getStaircasePosition();
-      if (this->player->x == x && this->player->y == y) {
-        // go to the next floor
-        this->currentFloor->advance(this->renderer->getSDLRenderer());
-        --this->remainingLevels;
-        // if the player just left the last level
-        if (this->remainingLevels == 0) {
-          this->gameState = VICTORY;
-          return;  // go to victory screen
-        }
-        // else, place the player in the middle of the next floor
-        this->placePlayerInRoom(false, NONE);
-      }
-    }
-    this->renderer->renderGame(currentRoom, this->player);
   }
+  // check if the player reached a staircase
+  // check if the staircase is in the current floor
+  if (currentRoom == this->currentFloor->getStaircaseRoom()) {
+  // check if the player is on the staircase tile
+  auto [x, y] = this->currentFloor->getStaircasePosition();
+    if (this->player->x == x && this->player->y == y) {
+      // go to the next floor
+      this->currentFloor->advance(this->renderer->getSDLRenderer());
+      --this->remainingLevels;
+      // if the player just left the last level
+      if (this->remainingLevels == 0) {
+        this->gameState = VICTORY;
+        return;  // go to victory screen
+      }
+      // else, place the player in the middle of the next floor
+      this->placePlayerInRoom(false, NONE);
+    }
+  }
+  this->renderer->renderGame(currentRoom, this->player);
 }
 
 void Engine::handleCombat(CombatMenuButtonID& command, Enemy* enemy, Player* player) {

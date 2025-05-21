@@ -24,12 +24,13 @@ enum Difficulty {
   HARD
 };
 
+/*
 enum RoomSide {
   LEFT,
   RIGHT,
   UP,
   DOWN
-};
+};*/
 
 enum EnemyTypes {
   SLIME,
