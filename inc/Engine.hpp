@@ -36,13 +36,14 @@ enum EnemyTypes {
   BAT,
   SCORPION
 };
-
 class Engine {
   private:
     Renderer* renderer;
     InputHandler* inputHandler;
     // AudioMixer* mixer;
     Player* player;
+    bool justMovedRooms;
+    // vector<Enemy*> enemies;
     // const int enemyTypeCount;
     Level* currentFloor;
     GameState gameState;
@@ -65,9 +66,8 @@ class Engine {
     void handleInGame(bool& quit);
     void handleCombat(CombatMenuButtonID& command, Enemy* enemy, Player* player);
 
-    void generateRooms();
     void initializePlayer();
-    void placePlayerInRoom(bool edge, RoomSide side);
+    void placePlayerInRoom(bool edge, Direction dir);
 
     bool readSettings();
     void writeSettings() const;

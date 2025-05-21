@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <asm.h>
 #include <Macros.h>
 #include <random>
 #include <Scorpion.hpp>
@@ -14,6 +15,8 @@ Engine::Engine() : newGame(true) {
   this->renderer = new Renderer;
   this->inputHandler = new InputHandler;
   this->player = nullptr;
+  this->justMovedRooms = false;
+  //this->player->loadSprite(this->renderer->getSDLRenderer(), PLAYER_SPRITE);
   this->currentFloor = new Level;
   this->gameState = MAIN_MENU;
   if (!readSettings()) {
@@ -99,20 +102,14 @@ int Engine::run() {
 }
 
 void Engine::runGame(bool& quit) {
-  // generate the floor for the first time
-  if (newGame) {
-    this->generateRooms();
-    this->initializePlayer();
-    this->placePlayerInRoom(false, LEFT);  // side is irrelevant here
-    this->newGame = false;
-  }
+  this->currentFloor->generateFloor(this->renderer->getSDLRenderer());
+  this->initializePlayer();
+  this->placePlayerInRoom(false, NONE);  // side is irrelevant here
   while (this->gameState == IN_GAME && !quit) {
     if (this->inputHandler->processEvents()) {
       quit = true;
       continue;
     }
-    Room* currentRoom = this->currentFloor->getCurrentRoom();
-    this->renderer->renderGame(currentRoom, this->player);
     this->handleInGame(quit);
   }
 }
@@ -165,6 +162,7 @@ void Engine::gameOver(bool& quit) {
 
 void Engine::victory(bool& quit) {
   // TODO:show victory screen
+  std::cout << "VICTORY" << std::endl;
   quit = true;
 }
 
@@ -314,10 +312,61 @@ void Engine::handleInGame(bool& quit) {
     // TODO: open pause menu
     quit = true;
   }
-  int combatTriggered =
-    this->inputHandler->handlePlayerMovement(
-      this->player, this->currentFloor->getCurrentRoom(),this->difficulty);
+
+  int combatTriggered = this->inputHandler->handlePlayerMovement(
+    this->player, this->currentFloor->getCurrentRoom(), this->difficulty);
   if (combatTriggered) this->gameState = COMBAT;
+  Room* currentRoom = this->currentFloor->getCurrentRoom();
+  // check if the player reached a doorway
+  // check what doorway was reached
+  if (!this->justMovedRooms) {  // if the player hasn't just moved to a new room
+    for (Direction dir = NORTH; dir <= EAST; ++dir) {
+      // if a room was found in this direction
+      if (currentRoom->getAdjacentRoom(dir)) {
+        // check if the player is in that doorway
+        auto [x, y] = currentRoom->getDoorwayPosition(dir);
+        if (this->player->x == x && this->player->y == y) {
+          // place the player in the new room
+          this->placePlayerInRoom(true, dir);
+          this->justMovedRooms = true;
+          break;
+        }
+      }
+    }
+  } else {
+    // reset justMovedRooms once the player moves out of a doorway
+    bool stillInDoorway = false;
+    for (Direction dir = NORTH; dir <= EAST; ++dir) {
+      if (currentRoom->getAdjacentRoom(dir)) {
+        auto [x, y] = currentRoom->getDoorwayPosition(dir);
+        if (this->player->x == x && this->player->y == y) {
+          stillInDoorway = true;
+          break;
+        }
+      }
+    }
+    if (!stillInDoorway) {
+      this->justMovedRooms = false;
+    }
+  // check if the player reached a staircase
+  // check if the staircase is in the current floor
+  if (currentRoom == this->currentFloor->getStaircaseRoom()) {
+    // check if the player is on the staircase tile
+    auto [x, y] = this->currentFloor->getStaircasePosition();
+    if (this->player->x == x && this->player->y == y) {
+      // go to the next floor
+      this->currentFloor->advance(this->renderer->getSDLRenderer());
+      --this->remainingLevels;
+      // if the player just left the last level
+      if (this->remainingLevels == 0) {
+        this->gameState = VICTORY;
+        return;  // go to victory screen
+      }
+      // else, place the player in the middle of the next floor
+      this->placePlayerInRoom(false, NONE);
+    }
+  }
+  this->renderer->renderGame(currentRoom, this->player);
 }
 
 void Engine::handleCombat(CombatMenuButtonID& command, Enemy* enemy, Player* player) {
@@ -385,31 +434,24 @@ void Engine::handleCombat(CombatMenuButtonID& command, Enemy* enemy, Player* pla
   }
 }
 
-void Engine::generateRooms() {
-  // Generate at least 3 rooms, and at most 6
-  std::mt19937 rng(std::random_device{}());
-  std::uniform_int_distribution<int> dist(MIN_ROOM_COUNT, MAX_ROOM_COUNT);
-  this->currentFloor->setRoomCount(dist(rng));
-  for (int room = 0; room < this->currentFloor->getRoomCount(); ++room) {
-    Room* newRoom = new Room;
-    newRoom->generate(this->renderer->getSDLRenderer());
-    this->currentFloor->addRoom(newRoom);
-  }
-}
-
 void Engine::initializePlayer() {
   this->player = new Player(this->renderer->getSDLRenderer(),
                             PLAYER_SPRITE, 0, 0, PLAYER_HEALTH);
 }
 
-
-void Engine::placePlayerInRoom(bool edge, RoomSide side) {
-  // TODO: handle room change
-  (void) edge;
-  (void) side;
+void Engine::placePlayerInRoom(bool edge, Direction dir) {
   Room* currentRoom = this->currentFloor->getCurrentRoom();
-  this->player->x = currentRoom->getWidth() / 2;
-  this->player->y = currentRoom->getHeight() / 2;
+  if (!edge) {
+    this->player->x = currentRoom->getWidth() / 2;
+    this->player->y = currentRoom->getHeight() / 2;
+    return;
+  }
+  Room* nextRoom = currentRoom->getAdjacentRoom(dir);
+  Direction oppDir = nextRoom->getOppositeDirection(dir);
+  auto [x, y] = nextRoom->getDoorwayPosition(oppDir);
+  this->player->x = x;
+  this->player->y = y;
+  this->currentFloor->moveRoom(nextRoom);
 }
 
 bool Engine::readSettings() {

@@ -3,11 +3,40 @@
 #include <chrono>
 #include <SDL_image.h>
 #include <iostream>
+#include <asm.h>
 #include <Macros.h>
-#include <random>
 
-Room::Room()
-    : width(0), height(0), floorTile(nullptr), wallTile(nullptr) {
+// ++direction
+Direction& operator++(Direction& dir) {
+  switch (dir) {
+    case Direction::NORTH:
+      dir = Direction::SOUTH;
+      break;
+    case Direction::SOUTH:
+      dir = Direction::WEST;
+      break;
+    case Direction::WEST:
+      dir = Direction::EAST;
+      break;
+    case Direction::EAST:
+      dir = Direction::NONE;
+      break;
+    case Direction::NONE:
+      dir = Direction::NONE;
+      break;
+  }
+  return dir;
+}
+
+// direction++
+Direction operator++(Direction& dir, int) {
+  Direction old = dir;
+  ++dir;
+  return old;
+}
+
+Room::Room() : width(0), height(0), floorTile(nullptr), wallTile(nullptr),
+  north(nullptr), south(nullptr), west(nullptr), east(nullptr) {
 }
 
 Room::~Room() {
@@ -20,11 +49,8 @@ Room::~Room() {
 }
 
 void Room::generateDimensions() {
-  std::mt19937 rng(std::random_device{}());
-  std::uniform_int_distribution<int> height(MIN_ROOM_SIZE, MAX_ROOM_HEIGHT);
-  std::uniform_int_distribution<int> width(MIN_ROOM_SIZE, MAX_ROOM_WIDTH);
-  this->height = height(rng);
-  this->width = width(rng);
+  this->height = rand_between(MIN_ROOM_SIZE, MAX_ROOM_HEIGHT);
+  this->width = rand_between(MIN_ROOM_SIZE, MAX_ROOM_WIDTH);
 }
 
 void Room::initializeTiles() {
@@ -60,16 +86,25 @@ bool Room::loadTextures(SDL_Renderer* renderer) {
   }
   this->wallTile = SDL_CreateTextureFromSurface(renderer, wallSurface);
   SDL_FreeSurface(wallSurface);
-  return this->floorTile && this->wallTile;
+  // Load staircase texture
+  SDL_Surface* stairSurface = IMG_Load(STAIRCASE_TILE);
+  if (!stairSurface) {
+    std::cerr << "Failed to load staircase texture: " << SDL_GetError()
+      << std::endl;
+    return false;
+  }
+  this->staircaseTile = SDL_CreateTextureFromSurface(renderer, stairSurface);
+  SDL_FreeSurface(stairSurface);
+  return this->floorTile && this->wallTile && this->staircaseTile;
 }
 
 void Room::generate(SDL_Renderer* renderer) {
   // Generate room dimensions
-  generateDimensions();
+  this->generateDimensions();
   // Initialize tiles
-  initializeTiles();
+  this->initializeTiles();
   // Load textures
-  if (!loadTextures(renderer)) {
+  if (!this->loadTextures(renderer)) {
     std::cerr << "Failed to load room textures" << std::endl;
   }
 }
@@ -81,14 +116,67 @@ TileType Room::getTileAt(int x, int y) const {
   return tiles[y][x];
 }
 
+Room* Room::getAdjacentRoom(Direction dir) {
+  switch (dir) {
+    case NORTH: return this->north;
+    case SOUTH: return this->south;
+    case WEST: return this->west;
+    case EAST: return this->east;
+    default: return nullptr;
+  }
+}
+
+
+Direction Room::getOppositeDirection(Direction dir) {
+  switch (dir) {
+    case NORTH: return SOUTH;
+    case SOUTH: return NORTH;
+    case WEST: return EAST;
+    case EAST: return WEST;
+    default: return dir;
+  }
+}
+
+void Room::createDoorway(Direction dir) {
+  auto [x, y] = getDoorwayPosition(dir);
+  tiles[y][x] = FLOOR;
+}
+
+std::pair<int, int> Room::getDoorwayPosition(Direction dir) {
+  switch (dir) {
+    case NORTH: return {width/2, 0};
+    case SOUTH: return {width/2, height-1};
+    case WEST: return {width-1, height/2};
+    case EAST: return {0, height/2};
+    default: return {-1, -1};  // invalid edge
+  }
+}
+
+void Room::connect(Direction dir, Room* room) {
+  if (dir == NORTH) {
+    this->north = room;
+  } else if (dir == SOUTH) {
+    this->south = room;
+  } else if (dir == WEST) {
+    this->west = room;
+  } else {
+    this->east = room;
+  }
+}
+
+void Room::placeStaircase(int x, int y) {
+  this->tiles[y][x] = STAIRCASE;
+}
+
 bool Room::checkWalkable(int x, int y) const
 {
   // Verificamos si está dentro de los límites del mapa
   if (y < 0 || y >= this->height || x < 0 || x >= this->width) {
     return false;
   }
-  // Caminable solo si el tipo de tile es FLOOR
-  return this->tiles[y][x] == TileType::FLOOR;
+  // Caminable solo si el tipo de tile es FLOOR o STAIRCASE
+  return this->tiles[y][x] == TileType::FLOOR ||
+          this->tiles[y][x] == TileType::STAIRCASE;
 }
 
 SDL_Point Room::calculateRoomPosition() const {

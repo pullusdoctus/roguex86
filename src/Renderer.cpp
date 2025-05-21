@@ -106,8 +106,7 @@ SDL_Texture* Renderer::renderText(const char* message, int font,
 
 void Renderer::renderGame(Room* currentRoom, Player* player) {
   // Clear the screen
-  SDL_SetRenderDrawColor(this->renderer, 0, 0, 0, 255);
-  SDL_RenderClear(this->renderer);
+  this->clearScreen();
   // Render the room and player
   this->renderRoom(currentRoom);
   this->renderPlayer(currentRoom, player);
@@ -127,9 +126,15 @@ void Renderer::renderRoom(Room* room) {
         TILE_SIZE
       };
       // Draw the appropriate texture based on tile type
-      auto tile = (room->getTileAt(x, y) == FLOOR)
-        ? room->getFloor()
-        : room->getWall();
+      SDL_Texture* tile;
+      TileType tType = room->getTileAt(x, y);
+      if (tType == FLOOR) {
+        tile = room->getFloor();
+      } else if (tType == WALL) {
+        tile = room->getWall();
+      } else {
+        tile = room->getStaircase();
+      }
       SDL_RenderCopy(this->renderer, tile, NULL, &dst);
     }
   }
@@ -176,8 +181,7 @@ void Renderer::showMainMenu() {
   storeMenuItemBounds(MENU_ITEM_NG, dstOption2);
   storeMenuItemBounds(MENU_ITEM_EXIT, dstOption3);
   // TODO: have the background use menu-bg.png
-  SDL_SetRenderDrawColor(this->renderer, 0, 0, 0, 255); // Black background
-  SDL_RenderClear(this->renderer);
+  this->clearScreen();
   // Draw each option
   SDL_RenderCopy(this->renderer, title, nullptr, &dstTitle);
   SDL_RenderCopy(this->renderer, option1, nullptr, &dstOption1);
@@ -226,8 +230,7 @@ void Renderer::showOptions() {
   storeMenuItemBounds(MENU_ITEM_INST, dstOption3);
   storeMenuItemBounds(MENU_ITEM_BACK, dstOption4);
   // Render background
-  SDL_SetRenderDrawColor(this->renderer, 0, 0, 0, 255); // Black background
-  SDL_RenderClear(this->renderer);
+  this->clearScreen();
   // Draw each option
   SDL_RenderCopy(this->renderer, title, nullptr, &dstTitle);
   SDL_RenderCopy(this->renderer, option1, nullptr, &dstOption1);
@@ -283,8 +286,7 @@ void Renderer::showChangeVolume(int currentVolume) {
   storeMenuItemBounds(MENU_ITEM_BACK, dstBackOption);
   storeMenuItemBounds(MENU_ITEM_VOL_SLIDER, sliderBg);
   // Render background
-  SDL_SetRenderDrawColor(this->renderer, 0, 0, 0, 255); // Black background
-  SDL_RenderClear(this->renderer);
+  this->clearScreen();
   // Draw title and back option
   SDL_RenderCopy(this->renderer, title, nullptr, &dstTitle);
   SDL_RenderCopy(this->renderer, volumeDisplay, nullptr, &dstVolumeText);
@@ -351,8 +353,7 @@ void Renderer::showDifficulty(int currentDifficulty) {
   storeMenuItemBounds(MENU_ITEM_HARD, dstOption3);
   storeMenuItemBounds(MENU_ITEM_BACK, dstOption4);
   // Render background
-  SDL_SetRenderDrawColor(this->renderer, 0, 0, 0, 255); // Black background
-  SDL_RenderClear(this->renderer);
+  this->clearScreen();
   // Draw each option
   SDL_RenderCopy(this->renderer, title, nullptr, &dstTitle);
   SDL_RenderCopy(this->renderer, option1, nullptr, &dstOption1);
@@ -421,8 +422,7 @@ void Renderer::showInstructions() {
   // Store button bounds for input handling
   storeMenuItemBounds(MENU_ITEM_BACK, dstBackOption);
   // Render background
-  SDL_SetRenderDrawColor(this->renderer, 0, 0, 0, 255); // Black background
-  SDL_RenderClear(this->renderer);
+  this->clearScreen();
   // Draw all elements
   SDL_RenderCopy(this->renderer, title, nullptr, &dstTitle);
   SDL_RenderCopy(this->renderer, description, nullptr, &dstDesc);
@@ -444,6 +444,11 @@ void Renderer::showInstructions() {
   SDL_DestroyTexture(combatInstr1);
   SDL_DestroyTexture(back);
 }
+
+void Renderer::clearScreen() {
+  SDL_SetRenderDrawColor(this->renderer, 0, 0, 0, 255);
+  SDL_RenderClear(this->renderer);
+ }
 
 void Renderer::renderCombat(Player* player, Enemy* enemy, int hoveredCommand) {
   // text colors

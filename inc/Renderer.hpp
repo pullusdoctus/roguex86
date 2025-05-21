@@ -85,6 +85,7 @@ class Renderer {
     void renderPlayer(Room* room, Player* player);
     // TODO: draw the pause menu when prompted in-game
     void showPauseMenu();
+    void clearScreen();
     void renderCombat(Player* player, Enemy* enemy, int hoveredCommand);
     void renderHealthBar(int x, int y, int w, int h, int hp, int maxHp);
 
