@@ -453,7 +453,7 @@ void Renderer::renderCombat(Player* player, Enemy* enemy, int hoveredCommand) {
   const char* labels[4] = {"attack", "objects", "defend", "run"};
   const int labelCount = 4;
   SDL_Texture* commandTitle =
-    renderText("COMMANDS", MAIN_MENU_FONT, textColor);
+    renderText("ENEMY", MAIN_MENU_FONT, textColor);
   SDL_Texture* commandOptions[labelCount];
   for (int i = 0; i < labelCount; ++i) {
     commandOptions[i] =
@@ -487,7 +487,7 @@ void Renderer::renderCombat(Player* player, Enemy* enemy, int hoveredCommand) {
   this->renderHealthBar(enemy->rect.x, barOffset, barWidth, barHeight,
                         enemy->hp, enemy->maxHp);
   this->renderHealthBar(player->rect.x + (spriteWidth - barWidth), barOffset,
-                        barWidth, barHeight, player->hp, player->maxHp);
+                        barWidth, barHeight, player->getHealth(), player->maxHp);
   // draw command box
   int commandY = 2 * third + margin;
   SDL_QueryTexture(commandTitle, nullptr, nullptr, &texW, &texH);

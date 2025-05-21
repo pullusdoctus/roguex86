@@ -7,6 +7,6 @@ Slime::Slime(SDL_Renderer* renderer, const std::string& spritePath,
         this->defense = 2;
         this->speed = 3;
         this->hp = 10;
-        this->maxHp = hp;
+        this->maxHp = 10;
         
    }

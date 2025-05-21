@@ -129,8 +129,9 @@ void Engine::startCombat(bool& quit) {
     Slime* slime = new Slime(this->renderer->getSDLRenderer(),
                            SLIME_SPRITE, 0, 0, SLIME_HEALTH);
     while (this->gameState == COMBAT) {
+    this->handleCombat(combatCommand, slime, this->player);
     this->renderer->renderCombat(this->player, slime, combatCommand);
-    this->handleCombat(combatCommand, slime);
+    
     }
   delete slime;
   
@@ -138,8 +139,9 @@ void Engine::startCombat(bool& quit) {
     Bat* bat = new Bat(this->renderer->getSDLRenderer(),
                        BAT_SPRITE, 0, 0, BAT_HEALTH);
     while (this->gameState == COMBAT) {
+    this->handleCombat(combatCommand, bat, this->player);
     this->renderer->renderCombat(this->player, bat, combatCommand);
-    this->handleCombat(combatCommand, bat);
+    
     }
     delete bat;
   } else if (randomEnemyType == 2) {
@@ -147,8 +149,9 @@ void Engine::startCombat(bool& quit) {
                                       SCORPION_SPRITE, 0, 0,
                                       SCORPION_HEALTH);
     while (this->gameState == COMBAT) {
+    this->handleCombat(combatCommand, scorpion, this->player);
     this->renderer->renderCombat(this->player, scorpion, combatCommand);
-    this->handleCombat(combatCommand, scorpion);
+    
     }
     delete scorpion;
   }
@@ -317,13 +320,14 @@ void Engine::handleInGame(bool& quit) {
   if (combatTriggered) this->gameState = COMBAT;
 }
 
-void Engine::handleCombat(CombatMenuButtonID& command, Enemy* enemy) {
+void Engine::handleCombat(CombatMenuButtonID& command, Enemy* enemy, Player* player) {
   this->inputHandler->processEvents();
+  
   if (this->inputHandler->keyPressed(A_KEY)) {
     --command;
   } else if (this->inputHandler->keyPressed(D_KEY)) {
     ++command;
-  } else if (this->inputHandler->keyPressed(ENTER)) {
+  } else if (this->inputHandler->keyPressed(ENTER)) {    
     switch (command) {
       case ATTACK: {
         std::cout << "ATTACK" << std::endl;
@@ -344,15 +348,26 @@ void Engine::handleCombat(CombatMenuButtonID& command, Enemy* enemy) {
         break;
       case DEFEND:
         std::cout << "DEFEND" << std::endl;
-        this->player->defend();
+        player->defend();
         break;
       case RUN:
         std::cout << "RUN" << std::endl;
         this->gameState = IN_GAME;
         return;
     }
-  }
 
+    // Acción del enemigo después de que el jugador actuó
+    if (enemy && enemy->getHealth() > 0) {
+      int enemyDamage = enemy->attack;
+      player->takeDamage(enemyDamage);
+      std::cout << "Enemy attacks! Player HP: " << this->player->getHealth() << "\n";
+      if (player->getHealth() <= 0) {
+        std::cout << "Player defeated!" << std::endl;
+        this->gameState = GAME_OVER;  // o lo que corresponda
+        return;
+      }
+    }
+  }
 }
 
 void Engine::generateRooms() {

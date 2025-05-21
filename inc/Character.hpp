@@ -2,6 +2,9 @@
 
 #include <SDL.h>
 #include <string>
+#include <cmath>    
+#include <cstdlib>   
+#include <ctime>     
 
 class Character {
   public:
@@ -24,9 +27,12 @@ class Character {
     bool loadSprite(SDL_Renderer* renderer, const char* spritePath);
 
 
+    int calculateDamage(int attack, int defense);
     void takeDamage(int damage);
     void defend() { this->defense += 5; }
+
     int getHealth() const { return this->hp; }
     int getAttack() const { return this->attack; }
+    int getDefense() const { return this->defense; }
     
 };
