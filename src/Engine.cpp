@@ -121,13 +121,38 @@ void Engine::startCombat(bool& quit) {
   (void)quit;
   CombatMenuButtonID combatCommand = ATTACK;
   // TODO: change this to randomly choose one of the three enemies
-  Slime* slime = new Slime(this->renderer->getSDLRenderer(),
+  std::mt19937 rng(std::random_device{}());
+  std::uniform_int_distribution<int> dist(0, 2);
+  int randomEnemyType = dist(rng);
+
+  if (randomEnemyType == 0) {
+    Slime* slime = new Slime(this->renderer->getSDLRenderer(),
                            SLIME_SPRITE, 0, 0, SLIME_HEALTH);
-  while (this->gameState == COMBAT) {
+    while (this->gameState == COMBAT) {
     this->renderer->renderCombat(this->player, slime, combatCommand);
     this->handleCombat(combatCommand, slime);
-  }
+    }
   delete slime;
+  
+  } else if (randomEnemyType == 1) {
+    Bat* bat = new Bat(this->renderer->getSDLRenderer(),
+                       BAT_SPRITE, 0, 0, BAT_HEALTH);
+    while (this->gameState == COMBAT) {
+    this->renderer->renderCombat(this->player, bat, combatCommand);
+    this->handleCombat(combatCommand, bat);
+    }
+    delete bat;
+  } else if (randomEnemyType == 2) {
+    Scorpion* scorpion = new Scorpion(this->renderer->getSDLRenderer(),
+                                      SCORPION_SPRITE, 0, 0,
+                                      SCORPION_HEALTH);
+    while (this->gameState == COMBAT) {
+    this->renderer->renderCombat(this->player, scorpion, combatCommand);
+    this->handleCombat(combatCommand, scorpion);
+    }
+    delete scorpion;
+  }
+  
 }
 
 void Engine::gameOver(bool& quit) {
