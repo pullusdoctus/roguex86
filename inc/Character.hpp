@@ -10,6 +10,9 @@ class Character {
     int step;
     int hp;
     int maxHp;
+    int attack;
+    int defense;
+    int speed;
 
     Character(SDL_Renderer* renderer, const std::string& spritePath,
               int startX, int startY, int hp);
@@ -19,4 +22,11 @@ class Character {
     void handleInput(const SDL_Event& e);
 
     bool loadSprite(SDL_Renderer* renderer, const char* spritePath);
+
+
+    void takeDamage(int damage);
+    void defend() { this->defense += 5; }
+    int getHealth() const { return this->hp; }
+    int getAttack() const { return this->attack; }
+    
 };

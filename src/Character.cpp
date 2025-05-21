@@ -54,3 +54,12 @@ bool Character::loadSprite(SDL_Renderer* renderer, const char* spritePath) {
   }
   return false;
 }
+
+void Character::takeDamage(int damage)
+{
+    this->hp -= damage;
+    if (this->hp < 0) {
+        this->hp = 0;
+    }
+
+}

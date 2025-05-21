@@ -125,7 +125,7 @@ void Engine::startCombat(bool& quit) {
                            SLIME_SPRITE, 0, 0, SLIME_HEALTH);
   while (this->gameState == COMBAT) {
     this->renderer->renderCombat(this->player, slime, combatCommand);
-    this->handleCombat(combatCommand);
+    this->handleCombat(combatCommand, slime);
   }
   delete slime;
 }
@@ -292,7 +292,7 @@ void Engine::handleInGame(bool& quit) {
   if (combatTriggered) this->gameState = COMBAT;
 }
 
-void Engine::handleCombat(CombatMenuButtonID& command) {
+void Engine::handleCombat(CombatMenuButtonID& command, Enemy* enemy) {
   this->inputHandler->processEvents();
   if (this->inputHandler->keyPressed(A_KEY)) {
     --command;
@@ -300,24 +300,34 @@ void Engine::handleCombat(CombatMenuButtonID& command) {
     ++command;
   } else if (this->inputHandler->keyPressed(ENTER)) {
     switch (command) {
-      case ATTACK:
+      case ATTACK: {
         std::cout << "ATTACK" << std::endl;
+        int damage = this->player->attack;
+        if (enemy) {
+          enemy->takeDamage(damage);
+          if (enemy->getHealth() <= 0) {
+            std::cout << "Enemy defeated!" << std::endl;
+            this->gameState = IN_GAME;
+            return;
+          }
+        }
         break;
+      }
       case OBJECTS:
         std::cout << "OBJECTS" << std::endl;
+        // TODO: Implement inventory usage logic
         break;
       case DEFEND:
         std::cout << "DEFEND" << std::endl;
+        this->player->defend();
         break;
       case RUN:
         std::cout << "RUN" << std::endl;
         this->gameState = IN_GAME;
-        break;
+        return;
     }
   }
-  // TODO: Implement combat logic
-  // TODO: return to room if enemy loses all health
-  // TODO: game over if player loses all health
+
 }
 
 void Engine::generateRooms() {
@@ -336,6 +346,7 @@ void Engine::initializePlayer() {
   this->player = new Player(this->renderer->getSDLRenderer(),
                             PLAYER_SPRITE, 0, 0, PLAYER_HEALTH);
 }
+
 
 void Engine::placePlayerInRoom(bool edge, RoomSide side) {
   // TODO: handle room change
