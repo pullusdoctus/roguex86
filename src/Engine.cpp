@@ -1,17 +1,19 @@
 #include <Engine.hpp>
 
+#include <Bat.hpp>
 #include <chrono>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <Macros.h>
 #include <random>
+#include <Scorpion.hpp>
+#include <Slime.hpp>
 
 Engine::Engine() : newGame(true) {
   this->renderer = new Renderer;
   this->inputHandler = new InputHandler;
   this->player = nullptr;
-  //this->player->loadSprite(this->renderer->getSDLRenderer(), PLAYER_SPRITE);
   this->currentFloor = new Level;
   this->gameState = MAIN_MENU;
   if (!readSettings()) {
@@ -29,6 +31,7 @@ Engine::Engine() : newGame(true) {
       this->remainingLevels = 7;
       break;
   }
+  this->newGame = true;
 }
 
 Engine::~Engine() {
@@ -75,8 +78,7 @@ int Engine::run() {
         this->runGame(quit);
         break;
       case COMBAT:
-        // TODO: Implement combat rendering and handling
-        std::cout << "Combat started" << std::endl;
+        this->startCombat(quit);
         break;
       case PAUSE:
         // TODO: Implement pause menu rendering and handling
@@ -97,9 +99,13 @@ int Engine::run() {
 }
 
 void Engine::runGame(bool& quit) {
-  this->generateRooms();
-  this->initializePlayer();
-  this->placePlayerInRoom(false, LEFT);  // side is irrelevant here
+  // generate the floor for the first time
+  if (newGame) {
+    this->generateRooms();
+    this->initializePlayer();
+    this->placePlayerInRoom(false, LEFT);  // side is irrelevant here
+    this->newGame = false;
+  }
   while (this->gameState == IN_GAME && !quit) {
     if (this->inputHandler->processEvents()) {
       quit = true;
@@ -109,6 +115,47 @@ void Engine::runGame(bool& quit) {
     this->renderer->renderGame(currentRoom, this->player);
     this->handleInGame(quit);
   }
+}
+
+void Engine::startCombat(bool& quit) {
+  (void)quit;
+  CombatMenuButtonID combatCommand = ATTACK;
+  // TODO: change this to randomly choose one of the three enemies
+  std::mt19937 rng(std::random_device{}());
+  std::uniform_int_distribution<int> dist(0, 2);
+  int randomEnemyType = dist(rng);
+
+  if (randomEnemyType == 0) {
+    Slime* slime = new Slime(this->renderer->getSDLRenderer(),
+                           SLIME_SPRITE, 0, 0, SLIME_HEALTH);
+    while (this->gameState == COMBAT) {
+    this->handleCombat(combatCommand, slime, this->player);
+    this->renderer->renderCombat(this->player, slime, combatCommand);
+    
+    }
+  delete slime;
+  
+  } else if (randomEnemyType == 1) {
+    Bat* bat = new Bat(this->renderer->getSDLRenderer(),
+                       BAT_SPRITE, 0, 0, BAT_HEALTH);
+    while (this->gameState == COMBAT) {
+    this->handleCombat(combatCommand, bat, this->player);
+    this->renderer->renderCombat(this->player, bat, combatCommand);
+    
+    }
+    delete bat;
+  } else if (randomEnemyType == 2) {
+    Scorpion* scorpion = new Scorpion(this->renderer->getSDLRenderer(),
+                                      SCORPION_SPRITE, 0, 0,
+                                      SCORPION_HEALTH);
+    while (this->gameState == COMBAT) {
+    this->handleCombat(combatCommand, scorpion, this->player);
+    this->renderer->renderCombat(this->player, scorpion, combatCommand);
+    
+    }
+    delete scorpion;
+  }
+  
 }
 
 void Engine::gameOver(bool& quit) {
@@ -267,8 +314,75 @@ void Engine::handleInGame(bool& quit) {
     // TODO: open pause menu
     quit = true;
   }
-  // TODO: handle movement
-  this->inputHandler->handlePlayerMovement(this->player, this->currentFloor->getCurrentRoom(),this->difficulty);
+  int combatTriggered =
+    this->inputHandler->handlePlayerMovement(
+      this->player, this->currentFloor->getCurrentRoom(),this->difficulty);
+  if (combatTriggered) this->gameState = COMBAT;
+}
+
+void Engine::handleCombat(CombatMenuButtonID& command, Enemy* enemy, Player* player) {
+  this->inputHandler->processEvents();
+  
+  if (this->inputHandler->keyPressed(A_KEY)) {
+    --command;
+  } else if (this->inputHandler->keyPressed(D_KEY)) {
+    ++command;
+  } else if (this->inputHandler->keyPressed(ENTER)) {    
+    switch (command) {
+      case ATTACK: {
+        std::cout << "ATTACK" << std::endl;
+        int damage = this->player->calculateDamage(
+          this->player->getAttack(), enemy->getDefense());
+        std::cout << "Damage dealt: " << damage << std::endl;
+        if (enemy) {
+          enemy->takeDamage(damage);
+          if (enemy->getHealth() <= 0) {
+            std::cout << "Enemy defeated!" << std::endl;
+            this->gameState = IN_GAME;
+            return;
+          }
+        }
+        break;
+      }
+      case OBJECTS:
+        std::cout << "OBJECTS" << std::endl;
+        // TODO: Implement inventory usage logic
+        break;
+      case DEFEND:
+        std::cout << "DEFEND" << std::endl;
+        player->defend();
+        break;
+      case RUN: {
+        std::cout << "RUN" << std::endl;
+        std::mt19937 rng(std::random_device{}());
+        std::uniform_int_distribution<int> dist(1, 100);
+        int chance = dist(rng);
+        if (chance <= 20) {
+          std::cout << "RUN failed!" << std::endl;
+        } else {
+          std::cout << "RUN succeeded!" << std::endl;
+          this->gameState = IN_GAME;
+          return;
+        }
+        break;
+      }
+    }
+
+    // Acción del enemigo después de que el jugador actuó
+    if (enemy && enemy->getHealth() > 0) {
+      int enemyDamage = enemy->calculateDamage(
+        enemy->getAttack(), player->getDefense());
+      std::cout << "Enemy damage: " << enemyDamage << std::endl;
+      player->takeDamage(enemyDamage);
+      this->player->isDefending = false;
+      std::cout << "Enemy attacks! Player HP: " << this->player->getHealth() << "\n";
+      if (player->getHealth() <= 0) {
+        std::cout << "Player defeated!" << std::endl;
+        this->gameState = GAME_OVER;  // o lo que corresponda
+        return;
+      }
+    }
+  }
 }
 
 void Engine::generateRooms() {
@@ -285,8 +399,9 @@ void Engine::generateRooms() {
 
 void Engine::initializePlayer() {
   this->player = new Player(this->renderer->getSDLRenderer(),
-                            PLAYER_SPRITE, 0, 0);
+                            PLAYER_SPRITE, 0, 0, PLAYER_HEALTH);
 }
+
 
 void Engine::placePlayerInRoom(bool edge, RoomSide side) {
   // TODO: handle room change

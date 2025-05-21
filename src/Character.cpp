@@ -4,8 +4,8 @@
 #include <Macros.h>
 
 Character::Character(SDL_Renderer* renderer, const std::string& imagePath,
-                     int startX, int startY)
-    : sprite(nullptr), step(TILE_SIZE) {
+                     int startX, int startY, int hp)
+    : sprite(nullptr), step(TILE_SIZE), hp(hp), maxHp(hp) {
   SDL_Surface* surface = IMG_Load(imagePath.c_str());
   if (!surface) {
       SDL_Log("Error al cargar imagen: %s", IMG_GetError());
@@ -53,4 +53,37 @@ bool Character::loadSprite(SDL_Renderer* renderer, const char* spritePath) {
     return true;
   }
   return false;
+}
+
+int Character::calculateDamage(int attack, int defense)
+{
+  if (defense <= 0) defense = 1; // evita división por cero
+
+  int base = static_cast<int>(std::floor((3.0 * attack) / defense));
+  
+  float variation = 0.5f + static_cast<float>(rand()) / RAND_MAX; // entre 0.5 y 1.5
+  
+  int finalDamage = static_cast<int>(std::round(base * variation));
+  
+  // Daño mínimo 1
+  if (finalDamage < 1) finalDamage = 1;
+  
+  return finalDamage;
+}
+
+void Character::takeDamage(int damage)
+{
+    this->hp -= damage;
+    if (this->hp < 0) {
+        this->hp = 0;
+    }
+
+}
+
+int Character::getDefense() const
+{
+  if (isDefending) {
+    return this->defense + this->defense / 5; // 20% bonus
+  }
+  return this->defense;
 }

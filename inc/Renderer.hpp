@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Enemy.hpp>
 #include <Player.hpp>
 #include <Room.hpp>
 
@@ -22,6 +23,16 @@ enum MainMenuButtonID {
   MENU_ITEM_VOL_SLIDER
 };
 
+enum CombatMenuButtonID {
+  ATTACK = 0,
+  OBJECTS,
+  DEFEND,
+  RUN
+};
+
+CombatMenuButtonID& operator++(CombatMenuButtonID& cmd);
+CombatMenuButtonID& operator--(CombatMenuButtonID& cmd);
+
 enum FontIDs {
   MAIN_MENU_FONT = 0,
   SUBTITLE_FONT,
@@ -37,6 +48,7 @@ class Renderer {
     int width;
     int height;
     std::vector<SDL_Rect> menuItemBounds;
+    std::vector<SDL_Rect> combatItemBounds;
 
   public:
     Renderer();
@@ -73,7 +85,10 @@ class Renderer {
     void renderPlayer(Room* room, Player* player);
     // TODO: draw the pause menu when prompted in-game
     void showPauseMenu();
+    void renderCombat(Player* player, Enemy* enemy, int hoveredCommand);
+    void renderHealthBar(int x, int y, int w, int h, int hp, int maxHp);
 
     void storeMenuItemBounds(MainMenuButtonID id, const SDL_Rect& bounds);
     const SDL_Rect& getMenuItemBounds(MainMenuButtonID id) const;
+    void storeCombatItemBounds(CombatMenuButtonID id, const SDL_Rect& bounds);
 };

@@ -31,13 +31,18 @@ enum RoomSide {
   DOWN
 };
 
+enum EnemyTypes {
+  SLIME,
+  BAT,
+  SCORPION
+};
+
 class Engine {
   private:
     Renderer* renderer;
     InputHandler* inputHandler;
     // AudioMixer* mixer;
     Player* player;
-    // vector<Enemy*> enemies;
     // const int enemyTypeCount;
     Level* currentFloor;
     GameState gameState;
@@ -47,6 +52,7 @@ class Engine {
     bool newGame;
 
     void runGame(bool& quit);
+    void startCombat(bool& quit);
     void gameOver(bool& quit);
     void victory(bool& quit);
 
@@ -57,6 +63,7 @@ class Engine {
     void handleDifficultyMenuInput();
     void handleInstructionsMenuInput();
     void handleInGame(bool& quit);
+    void handleCombat(CombatMenuButtonID& command, Enemy* enemy, Player* player);
 
     void generateRooms();
     void initializePlayer();
