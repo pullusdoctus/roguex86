@@ -16,6 +16,7 @@ class Character {
     int attack;
     int defense;
     int speed;
+    bool isDefending;
 
     Character(SDL_Renderer* renderer, const std::string& spritePath,
               int startX, int startY, int hp);
@@ -29,10 +30,10 @@ class Character {
 
     int calculateDamage(int attack, int defense);
     void takeDamage(int damage);
-    void defend() { this->defense += 5; }
+    void defend() { this->isDefending = true; }
 
     int getHealth() const { return this->hp; }
     int getAttack() const { return this->attack; }
-    int getDefense() const { return this->defense; }
+    int getDefense() const;
     
 };

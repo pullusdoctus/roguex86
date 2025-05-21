@@ -5,10 +5,10 @@
 Player::Player(SDL_Renderer* renderer, const std::string& spritePath,
                int startX, int startY, int hp) :
   Character(renderer, spritePath, startX, startY, hp), x(0), y(0) {
-  this->hp = 40;
-  this->maxHp = 40;
-  this->attack = 10;
-  this->defense = 5;
+  this->hp = 100;
+  this->maxHp = 100;
+  this->attack = 30;
+  this->defense = 20;
   this->speed = 5;
 }
 

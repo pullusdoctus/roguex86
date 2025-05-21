@@ -331,7 +331,9 @@ void Engine::handleCombat(CombatMenuButtonID& command, Enemy* enemy, Player* pla
     switch (command) {
       case ATTACK: {
         std::cout << "ATTACK" << std::endl;
-        int damage = this->player->attack;
+        int damage = this->player->calculateDamage(
+          this->player->getAttack(), enemy->getDefense());
+        std::cout << "Damage dealt: " << damage << std::endl;
         if (enemy) {
           enemy->takeDamage(damage);
           if (enemy->getHealth() <= 0) {
@@ -368,8 +370,11 @@ void Engine::handleCombat(CombatMenuButtonID& command, Enemy* enemy, Player* pla
 
     // Acción del enemigo después de que el jugador actuó
     if (enemy && enemy->getHealth() > 0) {
-      int enemyDamage = enemy->attack;
+      int enemyDamage = enemy->calculateDamage(
+        enemy->getAttack(), player->getDefense());
+      std::cout << "Enemy damage: " << enemyDamage << std::endl;
       player->takeDamage(enemyDamage);
+      this->player->isDefending = false;
       std::cout << "Enemy attacks! Player HP: " << this->player->getHealth() << "\n";
       if (player->getHealth() <= 0) {
         std::cout << "Player defeated!" << std::endl;

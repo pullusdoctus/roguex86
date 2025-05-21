@@ -79,3 +79,11 @@ void Character::takeDamage(int damage)
     }
 
 }
+
+int Character::getDefense() const
+{
+  if (isDefending) {
+    return this->defense + this->defense / 5; // 20% bonus
+  }
+  return this->defense;
+}

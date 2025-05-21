@@ -526,18 +526,31 @@ void Renderer::renderCombat(Player* player, Enemy* enemy, int hoveredCommand) {
 void Renderer::renderHealthBar(int x, int y, int w, int h, int hp, int maxHp) {
   float ratio = static_cast<float>(hp) / maxHp;
   SDL_Color barColor;
-  if (ratio < 0.1f) barColor = {255, 0, 0, 255};  // 10% = red
-  else if (ratio < 0.3f) barColor = {255, 255, 0, 255};  // 30% = yellow
-  else barColor = {0, 255, 0, 255};  // > 30% = green
+  if (ratio < 0.1f) barColor = {255, 0, 0, 255};      // rojo
+  else if (ratio < 0.3f) barColor = {255, 255, 0, 255}; // amarillo
+  else barColor = {0, 255, 0, 255};                    // verde
+
+  // barra de fondo gris
   SDL_Rect bg = {x, y, w, h};
-  SDL_Rect fg = {x, y, static_cast<int>(w * ratio), h};
-  // draw gray background
   SDL_SetRenderDrawColor(this->renderer, 50, 50, 50, 255);
   SDL_RenderFillRect(this->renderer, &bg);
-  // draw foreground
-  SDL_SetRenderDrawColor(this->renderer, barColor.r, barColor.g,
-                         barColor.b, 255);
+
+  // barra de vida
+  SDL_Rect fg = {x, y, static_cast<int>(w * ratio), h};
+  SDL_SetRenderDrawColor(this->renderer, barColor.r, barColor.g, barColor.b, 255);
   SDL_RenderFillRect(this->renderer, &fg);
+
+  // Mostrar texto "HP actual / HP máxima"
+  SDL_Color textColor = {255, 255, 255, 255};
+  std::string hpText = std::to_string(hp) + " / " + std::to_string(maxHp);
+  SDL_Texture* hpTexture = renderText(hpText.c_str(), MAIN_MENU_FONT, textColor);
+  if (hpTexture) {
+    int texW, texH;
+    SDL_QueryTexture(hpTexture, nullptr, nullptr, &texW, &texH);
+    SDL_Rect dst = {x + (w - texW) / 2, y - texH - 4, texW, texH}; // encima de la barra
+    SDL_RenderCopy(this->renderer, hpTexture, nullptr, &dst);
+    SDL_DestroyTexture(hpTexture);
+  }
 }
 
 void Renderer::storeMenuItemBounds(MainMenuButtonID id, const SDL_Rect& bounds) {
