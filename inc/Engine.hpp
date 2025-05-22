@@ -24,19 +24,26 @@ enum Difficulty {
   HARD
 };
 
+/*
 enum RoomSide {
   LEFT,
   RIGHT,
   UP,
   DOWN
-};
+};*/
 
+enum EnemyTypes {
+  SLIME,
+  BAT,
+  SCORPION
+};
 class Engine {
   private:
     Renderer* renderer;
     InputHandler* inputHandler;
     // AudioMixer* mixer;
     Player* player;
+    bool justMovedRooms;
     // vector<Enemy*> enemies;
     // const int enemyTypeCount;
     Level* currentFloor;
@@ -47,6 +54,7 @@ class Engine {
     bool newGame;
 
     void runGame(bool& quit);
+    void startCombat(bool& quit);
     void gameOver(bool& quit);
     void victory(bool& quit);
 
@@ -57,10 +65,10 @@ class Engine {
     void handleDifficultyMenuInput();
     void handleInstructionsMenuInput();
     void handleInGame(bool& quit);
+    void handleCombat(CombatMenuButtonID& command, Enemy* enemy, Player* player);
 
-    void generateRooms();
     void initializePlayer();
-    void placePlayerInRoom(bool edge, RoomSide side);
+    void placePlayerInRoom(bool edge, Direction dir);
 
     bool readSettings();
     void writeSettings() const;

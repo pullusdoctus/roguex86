@@ -1,16 +1,21 @@
 #include <Engine.hpp>
 
+#include <Bat.hpp>
 #include <chrono>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <asm.h>
 #include <Macros.h>
 #include <random>
+#include <Scorpion.hpp>
+#include <Slime.hpp>
 
 Engine::Engine() : newGame(true) {
   this->renderer = new Renderer;
   this->inputHandler = new InputHandler;
   this->player = nullptr;
+  this->justMovedRooms = false;
   //this->player->loadSprite(this->renderer->getSDLRenderer(), PLAYER_SPRITE);
   this->currentFloor = new Level;
   this->gameState = MAIN_MENU;
@@ -29,6 +34,7 @@ Engine::Engine() : newGame(true) {
       this->remainingLevels = 7;
       break;
   }
+  this->newGame = true;
 }
 
 Engine::~Engine() {
@@ -75,8 +81,7 @@ int Engine::run() {
         this->runGame(quit);
         break;
       case COMBAT:
-        // TODO: Implement combat rendering and handling
-        std::cout << "Combat started" << std::endl;
+        this->startCombat(quit);
         break;
       case PAUSE:
         // TODO: Implement pause menu rendering and handling
@@ -97,9 +102,12 @@ int Engine::run() {
 }
 
 void Engine::runGame(bool& quit) {
-  this->generateRooms();
-  this->initializePlayer();
-  this->placePlayerInRoom(false, LEFT);  // side is irrelevant here
+  if (newGame) {
+    this->currentFloor->generateFloor(this->renderer->getSDLRenderer());
+    this->initializePlayer();
+    this->placePlayerInRoom(false, NONE);  // side is irrelevant here
+    this->newGame = false;
+  }
   while (this->gameState == IN_GAME && !quit) {
     if (this->inputHandler->processEvents()) {
       quit = true;
@@ -111,6 +119,47 @@ void Engine::runGame(bool& quit) {
   }
 }
 
+void Engine::startCombat(bool& quit) {
+  (void)quit;
+  CombatMenuButtonID combatCommand = ATTACK;
+  // TODO: change this to randomly choose one of the three enemies
+  std::mt19937 rng(std::random_device{}());
+  std::uniform_int_distribution<int> dist(0, 2);
+  int randomEnemyType = dist(rng);
+
+  if (randomEnemyType == 0) {
+    Slime* slime = new Slime(this->renderer->getSDLRenderer(),
+                           SLIME_SPRITE, 0, 0, SLIME_HEALTH);
+    while (this->gameState == COMBAT) {
+    this->handleCombat(combatCommand, slime, this->player);
+    this->renderer->renderCombat(this->player, slime, combatCommand);
+    
+    }
+  delete slime;
+  
+  } else if (randomEnemyType == 1) {
+    Bat* bat = new Bat(this->renderer->getSDLRenderer(),
+                       BAT_SPRITE, 0, 0, BAT_HEALTH);
+    while (this->gameState == COMBAT) {
+    this->handleCombat(combatCommand, bat, this->player);
+    this->renderer->renderCombat(this->player, bat, combatCommand);
+    
+    }
+    delete bat;
+  } else if (randomEnemyType == 2) {
+    Scorpion* scorpion = new Scorpion(this->renderer->getSDLRenderer(),
+                                      SCORPION_SPRITE, 0, 0,
+                                      SCORPION_HEALTH);
+    while (this->gameState == COMBAT) {
+    this->handleCombat(combatCommand, scorpion, this->player);
+    this->renderer->renderCombat(this->player, scorpion, combatCommand);
+    
+    }
+    delete scorpion;
+  }
+  
+}
+
 void Engine::gameOver(bool& quit) {
   // TODO: show defeat screen
   quit = true;
@@ -118,6 +167,7 @@ void Engine::gameOver(bool& quit) {
 
 void Engine::victory(bool& quit) {
   // TODO:show victory screen
+  std::cout << "VICTORY" << std::endl;
   quit = true;
 }
 
@@ -267,34 +317,150 @@ void Engine::handleInGame(bool& quit) {
     // TODO: open pause menu
     quit = true;
   }
-  // TODO: handle movement
-  this->inputHandler->handlePlayerMovement(this->player, this->currentFloor->getCurrentRoom(),this->difficulty);
+
+  int combatTriggered = this->inputHandler->handlePlayerMovement(
+    this->player, this->currentFloor->getCurrentRoom(), this->difficulty);
+  if (combatTriggered) {
+    this->gameState = COMBAT;
+    return;
+  }
+  Room* currentRoom = this->currentFloor->getCurrentRoom();
+  // check if the player reached a doorway
+  // check what doorway was reached
+  if (!this->justMovedRooms) {  // if the player hasn't just moved to a new room
+    for (Direction dir = NORTH; dir <= EAST; ++dir) {
+      // if a room was found in this direction
+      if (currentRoom->getAdjacentRoom(dir)) {
+        // check if the player is in that doorway
+        auto [x, y] = currentRoom->getDoorwayPosition(dir);
+        if (this->player->x == x && this->player->y == y) {
+          // place the player in the new room
+          this->placePlayerInRoom(true, dir);
+          this->justMovedRooms = true;
+          break;
+        }
+      }
+    }
+  } else {
+    // reset justMovedRooms once the player moves out of a doorway
+    bool stillInDoorway = false;
+    for (Direction dir = NORTH; dir <= EAST; ++dir) {
+      if (currentRoom->getAdjacentRoom(dir)) {
+        auto [x, y] = currentRoom->getDoorwayPosition(dir);
+        if (this->player->x == x && this->player->y == y) {
+          stillInDoorway = true;
+          break;
+        }
+      }
+    }
+    if (!stillInDoorway) {
+      this->justMovedRooms = false;
+    }
+  }
+  // check if the player reached a staircase
+  // check if the staircase is in the current floor
+  if (currentRoom == this->currentFloor->getStaircaseRoom()) {
+  // check if the player is on the staircase tile
+  auto [x, y] = this->currentFloor->getStaircasePosition();
+    if (this->player->x == x && this->player->y == y) {
+      // go to the next floor
+      this->currentFloor->advance(this->renderer->getSDLRenderer());
+      --this->remainingLevels;
+      // if the player just left the last level
+      if (this->remainingLevels == 0) {
+        this->gameState = VICTORY;
+        return;  // go to victory screen
+      }
+      // else, place the player in the middle of the next floor
+      this->placePlayerInRoom(false, NONE);
+    }
+  }
+  this->renderer->renderGame(currentRoom, this->player);
 }
 
-void Engine::generateRooms() {
-  // Generate at least 3 rooms, and at most 6
-  std::mt19937 rng(std::random_device{}());
-  std::uniform_int_distribution<int> dist(MIN_ROOM_COUNT, MAX_ROOM_COUNT);
-  this->currentFloor->setRoomCount(dist(rng));
-  for (int room = 0; room < this->currentFloor->getRoomCount(); ++room) {
-    Room* newRoom = new Room;
-    newRoom->generate(this->renderer->getSDLRenderer());
-    this->currentFloor->addRoom(newRoom);
+void Engine::handleCombat(CombatMenuButtonID& command, Enemy* enemy, Player* player) {
+  this->inputHandler->processEvents();
+  
+  if (this->inputHandler->keyPressed(A_KEY)) {
+    --command;
+  } else if (this->inputHandler->keyPressed(D_KEY)) {
+    ++command;
+  } else if (this->inputHandler->keyPressed(ENTER)) {    
+    switch (command) {
+      case ATTACK: {
+        std::cout << "ATTACK" << std::endl;
+        int damage = this->player->calculateDamage(
+          this->player->getAttack(), enemy->getDefense());
+        std::cout << "Damage dealt: " << damage << std::endl;
+        if (enemy) {
+          enemy->takeDamage(damage);
+          if (enemy->getHealth() <= 0) {
+            std::cout << "Enemy defeated!" << std::endl;
+            this->gameState = IN_GAME;
+            return;
+          }
+        }
+        break;
+      }
+      case OBJECTS:
+        std::cout << "OBJECTS" << std::endl;
+        // TODO: Implement inventory usage logic
+        break;
+      case DEFEND:
+        std::cout << "DEFEND" << std::endl;
+        player->defend();
+        break;
+      case RUN: {
+        std::cout << "RUN" << std::endl;
+        std::mt19937 rng(std::random_device{}());
+        std::uniform_int_distribution<int> dist(1, 100);
+        int chance = dist(rng);
+        if (chance <= 20) {
+          std::cout << "RUN failed!" << std::endl;
+        } else {
+          std::cout << "RUN succeeded!" << std::endl;
+          this->gameState = IN_GAME;
+          return;
+        }
+        break;
+      }
+    }
+
+    // Acción del enemigo después de que el jugador actuó
+    if (enemy && enemy->getHealth() > 0) {
+      int enemyDamage = enemy->calculateDamage(
+        enemy->getAttack(), player->getDefense());
+      std::cout << "Enemy damage: " << enemyDamage << std::endl;
+      player->takeDamage(enemyDamage);
+      this->player->isDefending = false;
+      std::cout << "Enemy attacks! Player HP: " << this->player->getHealth() << "\n";
+      if (player->getHealth() <= 0) {
+        std::cout << "Player defeated!" << std::endl;
+        this->gameState = GAME_OVER;  // o lo que corresponda
+        return;
+      }
+    }
   }
 }
 
 void Engine::initializePlayer() {
   this->player = new Player(this->renderer->getSDLRenderer(),
-                            PLAYER_SPRITE, 0, 0);
+                            PLAYER_SPRITE, 0, 0, PLAYER_HEALTH);
 }
 
-void Engine::placePlayerInRoom(bool edge, RoomSide side) {
-  // TODO: handle room change
-  (void) edge;
-  (void) side;
+void Engine::placePlayerInRoom(bool edge, Direction dir) {
   Room* currentRoom = this->currentFloor->getCurrentRoom();
-  this->player->x = currentRoom->getWidth() / 2;
-  this->player->y = currentRoom->getHeight() / 2;
+  if (!edge) {
+    this->player->x = currentRoom->getWidth() / 2;
+    this->player->y = currentRoom->getHeight() / 2;
+    return;
+  }
+  Room* nextRoom = currentRoom->getAdjacentRoom(dir);
+  Direction oppDir = nextRoom->getOppositeDirection(dir);
+  auto [x, y] = nextRoom->getDoorwayPosition(oppDir);
+  this->player->x = x;
+  this->player->y = y;
+  this->currentFloor->moveRoom(nextRoom);
 }
 
 bool Engine::readSettings() {

@@ -15,6 +15,14 @@
 #define FONT_SIZE_PAUSE_MENU 12
 // Sprite definitions
 #define PLAYER_SPRITE "./rsc/img/sprites/player.png"
+#define SLIME_SPRITE "./rsc/img/sprites/slime.png"
+#define BAT_SPRITE "./rsc/img/sprites/bat.png"
+#define SCORPION_SPRITE "./rsc/img/sprites/scorpion.png"
+// Character stat definitions
+#define PLAYER_HEALTH 40
+#define SLIME_HEALTH 15
+#define BAT_HEALTH 25
+#define SCORPION_HEALTH 25
 // Tile and room definitions
 #define TILE_SIZE 64
 #define MIN_ROOM_SIZE 5
@@ -22,6 +30,7 @@
 #define MAX_ROOM_WIDTH 19
 #define WALL_TILE "./rsc/img/tiles/wall_tile.png"
 #define FLOOR_TILE "./rsc/img/tiles/floor_tile.png"
+#define STAIRCASE_TILE "./rsc/img/tiles/stair_tile.png"
 
 // Main Menu button coordinates
 #define MENU_TITLE_Y 100
@@ -41,8 +50,12 @@
 #define MIN_ROOM_COUNT 3
 #define MAX_ROOM_COUNT 6
 
+// Thresholds
+#define DOORWAY_PROXIMITY_THRESHOLD 2
+
 // Key Scancodes
 #define ESC SDL_SCANCODE_ESCAPE
+#define ENTER SDL_SCANCODE_RETURN
 #define W_KEY SDL_SCANCODE_W
 #define S_KEY SDL_SCANCODE_S
 #define A_KEY SDL_SCANCODE_A
