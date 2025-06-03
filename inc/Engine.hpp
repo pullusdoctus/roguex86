@@ -66,6 +66,7 @@ class Engine {
     void handleInstructionsMenuInput();
     void handleInGame(bool& quit);
     void handleCombat(CombatMenuButtonID& command, Enemy* enemy, Player* player);
+    void handlePauseMenuInput(bool& quit);
 
     void initializePlayer();
     void placePlayerInRoom(bool edge, Direction dir);

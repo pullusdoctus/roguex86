@@ -84,7 +84,7 @@ class Renderer {
     void renderGame(Room* currentRoom, Player* player);
     void renderRoom(Room* room);
     void renderPlayer(Room* room, Player* player);
-    // TODO: draw the pause menu when prompted in-game
+    // Draws the pause menu with 'Continuar' and 'Salir al menú principal' buttons
     void showPauseMenu();
     void clearScreen();
     void renderCombat(Player* player, Enemy* enemy, int hoveredCommand);

@@ -84,8 +84,8 @@ int Engine::run() {
         this->startCombat(quit);
         break;
       case PAUSE:
-        // TODO: Implement pause menu rendering and handling
-        std::cout << "Pause pressed" << std::endl;
+        this->renderer->showPauseMenu();
+        this->handlePauseMenuInput(quit);
         break;
       case GAME_OVER:
         this->gameOver(quit);
@@ -329,8 +329,8 @@ void Engine::handleInstructionsMenuInput() {
 
 void Engine::handleInGame(bool& quit) {
   if (this->inputHandler->keyPressed(ESC)) {
-    // TODO: open pause menu
-    quit = true;
+    this->gameState = PAUSE;
+    return;
   }
 
   int combatTriggered = this->inputHandler->handlePlayerMovement(
@@ -528,4 +528,23 @@ void Engine::updateDifficulty(Difficulty difficulty) {
       this->remainingLevels = 7;
       break;
   }
+}
+
+void Engine::handlePauseMenuInput(bool& quit) {
+    if (this->inputHandler->keyPressed(ESC)) {
+        this->gameState = IN_GAME;
+        return;
+    }
+    SDL_Point mouse = this->inputHandler->getMousePosition();
+    if (this->inputHandler->mouseClicked()) {
+        // Botón Continuar
+        if (this->inputHandler->isPointInNewGameButton(mouse, this->renderer)) {
+            this->gameState = IN_GAME;
+        }
+        // Botón Salir al menú principal
+        else if (this->inputHandler->isPointInExitButton(mouse, this->renderer)) {
+            this->gameState = MAIN_MENU;
+            quit = false; // No salir del juego, solo volver al menú principal
+        }
+    }
 }
