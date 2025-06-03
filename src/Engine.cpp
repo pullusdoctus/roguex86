@@ -101,6 +101,10 @@ int Engine::run() {
 
 void Engine::runGame(bool& quit) {
   if (newGame) {
+    this->renderer->showLoadingScreen(newGame);
+    // wait for player to press Enter
+    while (!this->inputHandler->keyPressed(ENTER))
+      this->inputHandler->processEvents();
     this->currentFloor->generateFloor(this->renderer->getSDLRenderer());
     this->initializePlayer();
     this->placePlayerInRoom(false, NONE);  // side is irrelevant here

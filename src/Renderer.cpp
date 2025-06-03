@@ -104,6 +104,47 @@ SDL_Texture* Renderer::renderText(const char* message, int font,
   return texture;
 }
 
+void Renderer::showLoadingScreen(bool newGame) {
+  if (newGame) showInitialLoad();
+  // showNewFloorLoad();
+}
+
+void Renderer::showInitialLoad() {
+  SDL_Color textColor = {255, 255, 255, 255}; // white
+  SDL_Texture* welcomeText =
+    this->renderText("Welcome to the dungeon... Good luck getting out!",
+                                             MAIN_MENU_FONT, textColor);
+  SDL_Texture* promptText = this->renderText("(Press Enter to start...)",
+                                           MAIN_MENU_FONT, textColor);
+  if (!welcomeText || !promptText) return;
+  int texW, texH;
+  // center texts
+  SDL_QueryTexture(welcomeText, nullptr, nullptr, &texW, &texH);
+  SDL_Rect dstWelcome = {
+    (this->width - texW) / 2,
+    (this->height - texH) / 2 - 30,  // slightly above center
+    texW,
+    texH
+  };
+  SDL_QueryTexture(promptText, nullptr, nullptr, &texW, &texH);
+  SDL_Rect dstPrompt = {
+    (this->width - texW) / 2,
+    (this->height - texH) / 2 + 30,  // slightly below center
+    texW,
+    texH
+  };
+  // clear the screen
+  this->clearScreen();
+  // draw the texts
+  SDL_RenderCopy(this->renderer, welcomeText, nullptr, &dstWelcome);
+  SDL_RenderCopy(this->renderer, promptText, nullptr, &dstPrompt);
+  // render the whole thing
+  SDL_RenderPresent(this->renderer);
+  // free the textures
+  SDL_DestroyTexture(welcomeText);
+  SDL_DestroyTexture(promptText);
+}
+
 void Renderer::renderGame(Room* currentRoom, Player* player) {
   // Clear the screen
   this->clearScreen();

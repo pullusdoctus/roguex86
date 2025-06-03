@@ -78,8 +78,10 @@ class Renderer {
     void showDifficulty(int currentDifficulty);
     // Displays the instructions screen
     void showInstructions();
-    // TODO: draws the loading screen
-    void showLoadingScreen();
+    void showLoadingScreen(bool newGame);
+    void showInitialLoad();
+    // TODO:
+    void showNewFloorLoad();
     void renderGame(Room* currentRoom, Player* player);
     void renderRoom(Room* room);
     void renderPlayer(Room* room, Player* player);
