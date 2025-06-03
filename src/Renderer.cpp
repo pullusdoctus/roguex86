@@ -104,9 +104,9 @@ SDL_Texture* Renderer::renderText(const char* message, int font,
   return texture;
 }
 
-void Renderer::showLoadingScreen(bool newGame) {
-  if (newGame) showInitialLoad();
-  // showNewFloorLoad();
+void Renderer::showLoadingScreen(bool newGame, int remainingLevels) {
+  if (newGame) this->showInitialLoad();
+  else this->showNewFloorLoad(remainingLevels);
 }
 
 void Renderer::showInitialLoad() {
@@ -143,6 +143,38 @@ void Renderer::showInitialLoad() {
   // free the textures
   SDL_DestroyTexture(welcomeText);
   SDL_DestroyTexture(promptText);
+}
+
+void Renderer::showNewFloorLoad(int remainingLevels) {
+  SDL_Color textColor = {255, 255, 255, 255}; // White color
+  // Create the appropriate message based on remaining levels
+  SDL_Texture* floorText = nullptr;
+  if (remainingLevels == 1) {
+    floorText = this->renderText("Last floor...", MAIN_MENU_FONT, textColor);
+  } else {
+    char floorMessage[64];
+    sprintf(floorMessage, "%d floors remain...", remainingLevels);
+    floorText = this->renderText(floorMessage, MAIN_MENU_FONT, textColor);
+  }
+  if (!floorText) return;
+  int texW, texH;
+  // center text
+  SDL_QueryTexture(floorText, nullptr, nullptr, &texW, &texH);
+  SDL_Rect dstText = {
+    (this->width - texW) / 2,
+    (this->height - texH) / 2,
+    texW,
+    texH
+  };
+  this->clearScreen();
+  // draw the text
+  SDL_RenderCopy(this->renderer, floorText, nullptr, &dstText);
+  // render the whole thing
+  SDL_RenderPresent(this->renderer);
+  // wait for 3 seconds
+  SDL_Delay(3000);
+  // free the texture
+  SDL_DestroyTexture(floorText);
 }
 
 void Renderer::renderGame(Room* currentRoom, Player* player) {

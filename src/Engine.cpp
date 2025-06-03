@@ -100,8 +100,8 @@ int Engine::run() {
 }
 
 void Engine::runGame(bool& quit) {
-  if (newGame) {
-    this->renderer->showLoadingScreen(newGame);
+  if (this->newGame) {
+    this->renderer->showLoadingScreen(this->newGame, this->remainingLevels);
     // wait for player to press Enter
     while (!this->inputHandler->keyPressed(ENTER))
       this->inputHandler->processEvents();
@@ -109,6 +109,7 @@ void Engine::runGame(bool& quit) {
     this->initializePlayer();
     this->placePlayerInRoom(false, NONE);  // side is irrelevant here
     this->newGame = false;
+    this->renderer->showLoadingScreen(this->newGame, this->remainingLevels);
   }
   while (this->gameState == IN_GAME && !quit) {
     if (this->inputHandler->processEvents()) {
@@ -374,6 +375,7 @@ void Engine::handleInGame(bool& quit) {
       }
       // else, place the player in the middle of the next floor
       this->placePlayerInRoom(false, NONE);
+      this->renderer->showLoadingScreen(this->newGame, this->remainingLevels);
     }
   }
   this->renderer->renderGame(currentRoom, this->player);
