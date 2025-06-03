@@ -42,13 +42,20 @@ For more details on how the game is designed, visit the [design directory](./des
 
 ### Priorities
 
-- [ ] Finish asset design: Loading Screen, Defeat Screen, Victory Screen
-- [ ] Design level generation
-    - [ ] Figure out how to connect rooms
-    - [ ] Limit floor size (< 10 floors, < 5 rooms)
-    - [ ] Figure out how to place stairs/boss
-- [ ] Combat
-    - [ ] attack
-    - [ ] defend
-    - [ ] Character dies, combat ends
-    - [ ] Player dies, game ends
+- [ ] Pause menu
+    - [ ] When in game, ESC opens pause menu
+    - [ ] From pause menu, can access inventory, see player stats, exit game
+    - [ ] Pause menu is a little window that is drawn on top of the game, in a corner of the screen
+- [ ] Inventory & Potions
+    - [ ] Player has an inventory where they store Objects
+    - [ ] Potions are a type of Object
+    - [ ] When used (in game/in combat), Potions heal 20HP
+- [ ] End Screens
+    - [ ] Finish asset design: Loading Screen, Defeat Screen, Victory Screen
+    - [ ] Loading Screen: when first entering the game, display "Welcome to the dungeon... Good luck getting out! (Press Enter to start...)"; when going to the next floor, display "Floor floor_number" for a while (~5 seconds)
+    - [ ] Defeat Screen: display "You lost, too bad! Do you wish to try again? (Press Enter to retry, or ESC to go back to the main menu)"
+    - [ ] Victory Screen: display "Lucky you, you managed to escape! Do you wish to try again? (Press Enter to retry, or ESC to go back to the main menu)"
+
+### Nice to Have
+- [ ] Combat Messages
+- [ ] Music

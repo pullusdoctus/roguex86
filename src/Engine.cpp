@@ -89,11 +89,9 @@ int Engine::run() {
         break;
       case GAME_OVER:
         this->gameOver(quit);
-        std::cout << "Game Over" << std::endl;
         break;
       case VICTORY:
         this->victory(quit);
-        std::cout << "Victory" << std::endl;
         break;
     }
   }
@@ -167,7 +165,6 @@ void Engine::gameOver(bool& quit) {
 
 void Engine::victory(bool& quit) {
   // TODO:show victory screen
-  std::cout << "VICTORY" << std::endl;
   quit = true;
 }
 
