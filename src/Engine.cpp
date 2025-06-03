@@ -386,9 +386,21 @@ void Engine::handleInGame(bool& quit) {
         this->gameState = VICTORY;
         return;  // go to victory screen
       }
-      // else, place the player in the middle of the next floor
-      this->placePlayerInRoom(false, NONE);
       this->renderer->showLoadingScreen(this->newGame, this->remainingLevels);
+      // keep generating floors until player is not placed on staircase
+      do {
+        // place the player in the middle of the floor
+        this->placePlayerInRoom(false, NONE);
+        // Check if player ended up on the staircase again
+        auto [newX, newY] = this->currentFloor->getStaircasePosition();
+        if (this->player->x == newX && this->player->y == newY) {
+          // player is on staircase, generate a new floor
+          this->currentFloor->advance(this->renderer->getSDLRenderer());
+        } else {
+          // player is not on staircase, we're good to go
+          break;
+        }
+      } while (true);
     }
   }
   this->renderer->renderGame(currentRoom, this->player);
