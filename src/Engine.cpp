@@ -187,7 +187,6 @@ void Engine::handleMainMenuInput(bool& quit) {
     else if (this->inputHandler->isPointInNewGameButton(mouse,
                                                         this->renderer)) {
       this->gameState = IN_GAME;
-      std::cout << "New game selected" << std::endl;
     }
     // Check if user clicked on Exit
     else if (this->inputHandler->isPointInExitButton(mouse, this->renderer)) {
@@ -410,18 +409,15 @@ void Engine::handleCombat(CombatMenuButtonID& command, Enemy* enemy, Player* pla
         // TODO: Implement inventory usage logic
         break;
       case DEFEND:
-        std::cout << "DEFEND" << std::endl;
         player->defend();
         break;
       case RUN: {
-        std::cout << "RUN" << std::endl;
         std::mt19937 rng(std::random_device{}());
         std::uniform_int_distribution<int> dist(1, 100);
         int chance = dist(rng);
         if (chance <= 20) {
-          std::cout << "RUN failed!" << std::endl;
+          // run failed
         } else {
-          std::cout << "RUN succeeded!" << std::endl;
           this->gameState = IN_GAME;
           return;
         }
