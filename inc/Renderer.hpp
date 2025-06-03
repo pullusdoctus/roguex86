@@ -89,6 +89,8 @@ class Renderer {
     void clearScreen();
     void renderCombat(Player* player, Enemy* enemy, int hoveredCommand);
     void renderHealthBar(int x, int y, int w, int h, int hp, int maxHp);
+    void renderGameOver();
+    void renderVictory();
 
     void storeMenuItemBounds(MainMenuButtonID id, const SDL_Rect& bounds);
     const SDL_Rect& getMenuItemBounds(MainMenuButtonID id) const;

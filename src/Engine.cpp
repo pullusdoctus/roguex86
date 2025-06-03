@@ -164,13 +164,27 @@ void Engine::startCombat(bool& quit) {
 }
 
 void Engine::gameOver(bool& quit) {
-  // TODO: show defeat screen
-  quit = true;
+  this->renderer->renderGameOver();
+  while (this->gameState == GAME_OVER && !quit) {
+    this->inputHandler->processEvents();
+    if (this->inputHandler->keyPressed(ENTER))
+      this->gameState = MAIN_MENU;
+    if (this->inputHandler->keyPressed(ESC)) {
+      quit = true;
+    }
+  }
 }
 
 void Engine::victory(bool& quit) {
-  // TODO:show victory screen
-  quit = true;
+  this->renderer->renderVictory();
+  while (this->gameState == VICTORY && !quit) {
+    this->inputHandler->processEvents();
+    if (this->inputHandler->keyPressed(ENTER))
+      this->gameState = MAIN_MENU;
+    if (this->inputHandler->keyPressed(ESC)) {
+      quit = true;
+    }
+  }
 }
 
 void Engine::handleMainMenuInput(bool& quit) {
