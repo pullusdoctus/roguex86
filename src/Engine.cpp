@@ -10,6 +10,7 @@
 #include <random>
 #include <Scorpion.hpp>
 #include <Slime.hpp>
+#include <InventoryUI.hpp>
 
 Engine::Engine() : newGame(true) {
   this->renderer = new Renderer;
@@ -333,6 +334,15 @@ void Engine::handleInGame(bool& quit) {
     return;
   }
 
+  // Abrir inventario con la tecla 'I'
+  if (this->inputHandler->keyPressed(I_KEY)) {
+    this->openInventory();
+    // Renderizar de nuevo el juego tras cerrar el inventario
+    Room* currentRoom = this->currentFloor->getCurrentRoom();
+    this->renderer->renderGame(currentRoom, this->player);
+    return;
+  }
+
   int combatTriggered = this->inputHandler->handlePlayerMovement(
     this->player, this->currentFloor->getCurrentRoom(), this->difficulty);
   if (combatTriggered) {
@@ -432,7 +442,32 @@ void Engine::handleCombat(CombatMenuButtonID& command, Enemy* enemy, Player* pla
       }
       case OBJECTS:
         std::cout << "OBJECTS" << std::endl;
-        // TODO: Implement inventory usage logic
+        // Mostrar inventario visual y permitir usar poción o bomba
+        {
+            InventoryUI invUI;
+            int idx = invUI.show(this->renderer->getSDLRenderer(), player->inventory);
+            if (idx >= 0 && idx < (int)player->inventory.size()) {
+                Item& item = player->inventory[idx];
+                if (item.type == ItemType::HEALTH_POTION) {
+                    player->hp = std::min(player->hp + item.value, player->maxHp);
+                    std::cout << "¡Poción de salud usada! Vida actual: " << player->getHealth() << std::endl;
+                    player->inventory.erase(player->inventory.begin() + idx);
+                } else if (item.type == ItemType::BOMB) {
+                    if (enemy) {
+                        enemy->takeDamage(item.value);
+                        std::cout << "¡Bomba usada! Daño al enemigo: " << item.value << std::endl;
+                        player->inventory.erase(player->inventory.begin() + idx);
+                        if (enemy->getHealth() <= 0) {
+                            std::cout << "Enemy defeated by bomb!" << std::endl;
+                            this->gameState = IN_GAME;
+                            return;
+                        }
+                    }
+                }
+            } else {
+                std::cout << "Inventario cancelado o vacío." << std::endl;
+            }
+        }
         break;
       case DEFEND:
         player->defend();
@@ -471,6 +506,20 @@ void Engine::handleCombat(CombatMenuButtonID& command, Enemy* enemy, Player* pla
 void Engine::initializePlayer() {
   this->player = new Player(this->renderer->getSDLRenderer(),
                             PLAYER_SPRITE, 0, 0, PLAYER_HEALTH);
+    if (this->player) {
+        // Por ahora, al crear el jugador, le damos 2 pociones de salud y 1 bomba
+        Item potion;
+        potion.type = ItemType::HEALTH_POTION;
+        potion.name = "Health Potion";
+        potion.value = 20;
+        this->player->addItem(potion);
+        this->player->addItem(potion);
+        Item bomb;
+        bomb.type = ItemType::BOMB;
+        bomb.name = "Bomb";
+        bomb.value = 30;
+        this->player->addItem(bomb);
+    }
 }
 
 void Engine::placePlayerInRoom(bool edge, Direction dir) {
@@ -546,5 +595,23 @@ void Engine::handlePauseMenuInput(bool& quit) {
             this->gameState = MAIN_MENU;
             quit = false; // No salir del juego, solo volver al menú principal
         }
+    }
+}
+
+void Engine::openInventory() {
+    InventoryUI invUI;
+    int idx = invUI.show(this->renderer->getSDLRenderer(), this->player->inventory);
+    if (idx >= 0 && idx < (int)this->player->inventory.size()) {
+        Item& item = this->player->inventory[idx];
+        if (item.type == ItemType::HEALTH_POTION) {
+            this->player->hp = std::min(this->player->hp + item.value, this->player->maxHp);
+            std::cout << "¡Poción de salud usada! Vida actual: " << this->player->getHealth() << std::endl;
+        } else if (item.type == ItemType::BOMB) {
+            // En combate: dañar enemigo, fuera de combate: mensaje
+            std::cout << "¡Bomba lista para usar en combate!" << std::endl;
+        }
+        this->player->inventory.erase(this->player->inventory.begin() + idx);
+    } else {
+        std::cout << "Inventario cancelado o vacío." << std::endl;
     }
 }

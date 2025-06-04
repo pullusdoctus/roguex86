@@ -80,4 +80,5 @@ class Engine {
     ~Engine();
 
     int run();
+    void openInventory();
 };
