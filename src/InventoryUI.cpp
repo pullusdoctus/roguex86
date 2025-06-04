@@ -57,7 +57,7 @@ int InventoryUI::show(SDL_Renderer* renderer, const std::vector<Item>& items) {
                     }
                 }
             }
-            if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE) {
+            if (e.type == SDL_KEYDOWN && (e.key.keysym.sym == SDLK_ESCAPE || e.key.keysym.sym == SDLK_i)) {
                 running = false; break;
             }
         }

@@ -722,7 +722,7 @@ void Renderer::storeCombatItemBounds(CombatMenuButtonID id, const SDL_Rect& boun
 void Renderer::showPauseMenu() {
     SDL_Color textColor = {255, 255, 255, 255}; // Blanco
     SDL_Color bgColor = {0, 0, 0, 200}; // Fondo semitransparente
-    SDL_Color highlightColor = {200, 200, 0, 255}; // Amarillo para resaltar
+    //SDL_Color highlightColor = {200, 200, 0, 255}; // Amarillo para resaltar
     // Dibuja fondo semitransparente
     SDL_Rect bgRect = {this->width / 4, this->height / 4, this->width / 2, this->height / 2};
     SDL_SetRenderDrawBlendMode(this->renderer, SDL_BLENDMODE_BLEND);

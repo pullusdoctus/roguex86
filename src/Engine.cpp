@@ -119,7 +119,7 @@ void Engine::runGame(bool& quit) {
     }
     Room* currentRoom = this->currentFloor->getCurrentRoom();
     this->renderer->renderGame(currentRoom, this->player);
-    this->handleInGame(quit);
+    this->handleInGame();
   }
 }
 
@@ -328,7 +328,7 @@ void Engine::handleInstructionsMenuInput() {
   }
 }
 
-void Engine::handleInGame(bool& quit) {
+void Engine::handleInGame() {
   if (this->inputHandler->keyPressed(ESC)) {
     this->gameState = PAUSE;
     return;
