@@ -64,8 +64,9 @@ class Engine {
     void calculateVolumeFromSliderPosition(int x);
     void handleDifficultyMenuInput();
     void handleInstructionsMenuInput();
-    void handleInGame(bool& quit);
+    void handleInGame();
     void handleCombat(CombatMenuButtonID& command, Enemy* enemy, Player* player);
+    void handlePauseMenuInput(bool& quit);
 
     void initializePlayer();
     void placePlayerInRoom(bool edge, Direction dir);
@@ -79,4 +80,5 @@ class Engine {
     ~Engine();
 
     int run();
+    void openInventory();
 };

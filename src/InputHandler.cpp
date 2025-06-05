@@ -2,6 +2,8 @@
 
 #include <Macros.h>
 
+#include <vector>
+
 InputHandler::InputHandler() {
   // Initialize all keys as not pressed
   for (int i = 0; i < SDL_NUM_SCANCODES; i++) {
@@ -200,7 +202,8 @@ bool InputHandler::handlePlayerMovement(Player *player, Room *room, int difficul
   }
   
 
-  if (moved) {
+  TileType playerTile = room->getTileAt(player->x, player->y);
+  if (moved && playerTile != STAIRCASE) {
     int roll = dist(gen); // Roll a number between 1 and 100
     if (roll <= chance) {     // 10% of chance to trigger combat
       combat = true;    // Trigger combat

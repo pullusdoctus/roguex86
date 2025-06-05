@@ -10,6 +10,7 @@
 #include <random>
 #include <Scorpion.hpp>
 #include <Slime.hpp>
+#include <InventoryUI.hpp>
 
 Engine::Engine() : newGame(true) {
   this->renderer = new Renderer;
@@ -84,8 +85,8 @@ int Engine::run() {
         this->startCombat(quit);
         break;
       case PAUSE:
-        // TODO: Implement pause menu rendering and handling
-        std::cout << "Pause pressed" << std::endl;
+        this->renderer->showPauseMenu();
+        this->handlePauseMenuInput(quit);
         break;
       case GAME_OVER:
         this->gameOver(quit);
@@ -100,11 +101,16 @@ int Engine::run() {
 }
 
 void Engine::runGame(bool& quit) {
-  if (newGame) {
+  if (this->newGame) {
+    this->renderer->showLoadingScreen(this->newGame, this->remainingLevels);
+    // wait for player to press Enter
+    while (!this->inputHandler->keyPressed(ENTER))
+      this->inputHandler->processEvents();
     this->currentFloor->generateFloor(this->renderer->getSDLRenderer());
     this->initializePlayer();
     this->placePlayerInRoom(false, NONE);  // side is irrelevant here
     this->newGame = false;
+    this->renderer->showLoadingScreen(this->newGame, this->remainingLevels);
   }
   while (this->gameState == IN_GAME && !quit) {
     if (this->inputHandler->processEvents()) {
@@ -113,7 +119,7 @@ void Engine::runGame(bool& quit) {
     }
     Room* currentRoom = this->currentFloor->getCurrentRoom();
     this->renderer->renderGame(currentRoom, this->player);
-    this->handleInGame(quit);
+    this->handleInGame();
   }
 }
 
@@ -159,13 +165,27 @@ void Engine::startCombat(bool& quit) {
 }
 
 void Engine::gameOver(bool& quit) {
-  // TODO: show defeat screen
-  quit = true;
+  this->renderer->renderGameOver();
+  while (this->gameState == GAME_OVER && !quit) {
+    this->inputHandler->processEvents();
+    if (this->inputHandler->keyPressed(ENTER))
+      this->gameState = MAIN_MENU;
+    if (this->inputHandler->keyPressed(ESC)) {
+      quit = true;
+    }
+  }
 }
 
 void Engine::victory(bool& quit) {
-  // TODO:show victory screen
-  quit = true;
+  this->renderer->renderVictory();
+  while (this->gameState == VICTORY && !quit) {
+    this->inputHandler->processEvents();
+    if (this->inputHandler->keyPressed(ENTER))
+      this->gameState = MAIN_MENU;
+    if (this->inputHandler->keyPressed(ESC)) {
+      quit = true;
+    }
+  }
 }
 
 void Engine::handleMainMenuInput(bool& quit) {
@@ -182,7 +202,6 @@ void Engine::handleMainMenuInput(bool& quit) {
     else if (this->inputHandler->isPointInNewGameButton(mouse,
                                                         this->renderer)) {
       this->gameState = IN_GAME;
-      std::cout << "New game selected" << std::endl;
     }
     // Check if user clicked on Exit
     else if (this->inputHandler->isPointInExitButton(mouse, this->renderer)) {
@@ -309,10 +328,19 @@ void Engine::handleInstructionsMenuInput() {
   }
 }
 
-void Engine::handleInGame(bool& quit) {
+void Engine::handleInGame() {
   if (this->inputHandler->keyPressed(ESC)) {
-    // TODO: open pause menu
-    quit = true;
+    this->gameState = PAUSE;
+    return;
+  }
+
+  // Abrir inventario con la tecla 'I'
+  if (this->inputHandler->keyPressed(I_KEY)) {
+    this->openInventory();
+    // Renderizar de nuevo el juego tras cerrar el inventario
+    Room* currentRoom = this->currentFloor->getCurrentRoom();
+    this->renderer->renderGame(currentRoom, this->player);
+    return;
   }
 
   int combatTriggered = this->inputHandler->handlePlayerMovement(
@@ -368,8 +396,21 @@ void Engine::handleInGame(bool& quit) {
         this->gameState = VICTORY;
         return;  // go to victory screen
       }
-      // else, place the player in the middle of the next floor
-      this->placePlayerInRoom(false, NONE);
+      this->renderer->showLoadingScreen(this->newGame, this->remainingLevels);
+      // keep generating floors until player is not placed on staircase
+      do {
+        // place the player in the middle of the floor
+        this->placePlayerInRoom(false, NONE);
+        // Check if player ended up on the staircase again
+        auto [newX, newY] = this->currentFloor->getStaircasePosition();
+        if (this->player->x == newX && this->player->y == newY) {
+          // player is on staircase, generate a new floor
+          this->currentFloor->advance(this->renderer->getSDLRenderer());
+        } else {
+          // player is not on staircase, we're good to go
+          break;
+        }
+      } while (true);
     }
   }
   this->renderer->renderGame(currentRoom, this->player);
@@ -401,21 +442,43 @@ void Engine::handleCombat(CombatMenuButtonID& command, Enemy* enemy, Player* pla
       }
       case OBJECTS:
         std::cout << "OBJECTS" << std::endl;
-        // TODO: Implement inventory usage logic
+        // Mostrar inventario visual y permitir usar poción o bomba
+        {
+            InventoryUI invUI;
+            int idx = invUI.show(this->renderer->getSDLRenderer(), player->inventory);
+            if (idx >= 0 && idx < (int)player->inventory.size()) {
+                Item& item = player->inventory[idx];
+                if (item.type == ItemType::HEALTH_POTION) {
+                    player->hp = std::min(player->hp + item.value, player->maxHp);
+                    std::cout << "¡Poción de salud usada! Vida actual: " << player->getHealth() << std::endl;
+                    player->inventory.erase(player->inventory.begin() + idx);
+                } else if (item.type == ItemType::BOMB) {
+                    if (enemy) {
+                        enemy->takeDamage(item.value);
+                        std::cout << "¡Bomba usada! Daño al enemigo: " << item.value << std::endl;
+                        player->inventory.erase(player->inventory.begin() + idx);
+                        if (enemy->getHealth() <= 0) {
+                            std::cout << "Enemy defeated by bomb!" << std::endl;
+                            this->gameState = IN_GAME;
+                            return;
+                        }
+                    }
+                }
+            } else {
+                std::cout << "Inventario cancelado o vacío." << std::endl;
+            }
+        }
         break;
       case DEFEND:
-        std::cout << "DEFEND" << std::endl;
         player->defend();
         break;
       case RUN: {
-        std::cout << "RUN" << std::endl;
         std::mt19937 rng(std::random_device{}());
         std::uniform_int_distribution<int> dist(1, 100);
         int chance = dist(rng);
         if (chance <= 20) {
-          std::cout << "RUN failed!" << std::endl;
+          // run failed
         } else {
-          std::cout << "RUN succeeded!" << std::endl;
           this->gameState = IN_GAME;
           return;
         }
@@ -443,6 +506,20 @@ void Engine::handleCombat(CombatMenuButtonID& command, Enemy* enemy, Player* pla
 void Engine::initializePlayer() {
   this->player = new Player(this->renderer->getSDLRenderer(),
                             PLAYER_SPRITE, 0, 0, PLAYER_HEALTH);
+    if (this->player) {
+        // Por ahora, al crear el jugador, le damos 2 pociones de salud y 1 bomba
+        Item potion;
+        potion.type = ItemType::HEALTH_POTION;
+        potion.name = "Health Potion";
+        potion.value = 20;
+        this->player->addItem(potion);
+        this->player->addItem(potion);
+        Item bomb;
+        bomb.type = ItemType::BOMB;
+        bomb.name = "Bomb";
+        bomb.value = 30;
+        this->player->addItem(bomb);
+    }
 }
 
 void Engine::placePlayerInRoom(bool edge, Direction dir) {
@@ -500,4 +577,41 @@ void Engine::updateDifficulty(Difficulty difficulty) {
       this->remainingLevels = 7;
       break;
   }
+}
+
+void Engine::handlePauseMenuInput(bool& quit) {
+    if (this->inputHandler->keyPressed(ESC)) {
+        this->gameState = IN_GAME;
+        return;
+    }
+    SDL_Point mouse = this->inputHandler->getMousePosition();
+    if (this->inputHandler->mouseClicked()) {
+        // Botón Continuar
+        if (this->inputHandler->isPointInNewGameButton(mouse, this->renderer)) {
+            this->gameState = IN_GAME;
+        }
+        // Botón Salir al menú principal
+        else if (this->inputHandler->isPointInExitButton(mouse, this->renderer)) {
+            this->gameState = MAIN_MENU;
+            quit = false; // No salir del juego, solo volver al menú principal
+        }
+    }
+}
+
+void Engine::openInventory() {
+    InventoryUI invUI;
+    int idx = invUI.show(this->renderer->getSDLRenderer(), this->player->inventory);
+    if (idx >= 0 && idx < (int)this->player->inventory.size()) {
+        Item& item = this->player->inventory[idx];
+        if (item.type == ItemType::HEALTH_POTION) {
+            this->player->hp = std::min(this->player->hp + item.value, this->player->maxHp);
+            std::cout << "¡Poción de salud usada! Vida actual: " << this->player->getHealth() << std::endl;
+        } else if (item.type == ItemType::BOMB) {
+            // En combate: dañar enemigo, fuera de combate: mensaje
+            std::cout << "¡Bomba lista para usar en combate!" << std::endl;
+        }
+        this->player->inventory.erase(this->player->inventory.begin() + idx);
+    } else {
+        std::cout << "Inventario cancelado o vacío." << std::endl;
+    }
 }

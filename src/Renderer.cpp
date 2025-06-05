@@ -104,6 +104,80 @@ SDL_Texture* Renderer::renderText(const char* message, int font,
   return texture;
 }
 
+void Renderer::showLoadingScreen(bool newGame, int remainingLevels) {
+  if (newGame) this->showInitialLoad();
+  else this->showNewFloorLoad(remainingLevels);
+}
+
+void Renderer::showInitialLoad() {
+  SDL_Color textColor = {255, 255, 255, 255}; // white
+  SDL_Color promptColor = {160, 160, 160, 255}; // light gray
+  SDL_Texture* welcomeText =
+    this->renderText("Welcome to the dungeon... Good luck getting out!",
+                                             MAIN_MENU_FONT, textColor);
+  SDL_Texture* promptText = this->renderText("(Press Enter to start...)",
+                                           INSTRUCTION_FONT, promptColor);
+  if (!welcomeText || !promptText) return;
+  int texW, texH;
+  // center texts
+  SDL_QueryTexture(welcomeText, nullptr, nullptr, &texW, &texH);
+  SDL_Rect dstWelcome = {
+    (this->width - texW) / 2,
+    (this->height - texH) / 2 - 30,  // slightly above center
+    texW,
+    texH
+  };
+  SDL_QueryTexture(promptText, nullptr, nullptr, &texW, &texH);
+  SDL_Rect dstPrompt = {
+    (this->width - texW) / 2,
+    (this->height - texH) / 2 + 30,  // slightly below center
+    texW,
+    texH
+  };
+  // clear the screen
+  this->clearScreen();
+  // draw the texts
+  SDL_RenderCopy(this->renderer, welcomeText, nullptr, &dstWelcome);
+  SDL_RenderCopy(this->renderer, promptText, nullptr, &dstPrompt);
+  // render the whole thing
+  SDL_RenderPresent(this->renderer);
+  // free the textures
+  SDL_DestroyTexture(welcomeText);
+  SDL_DestroyTexture(promptText);
+}
+
+void Renderer::showNewFloorLoad(int remainingLevels) {
+  SDL_Color textColor = {255, 255, 255, 255}; // White color
+  // Create the appropriate message based on remaining levels
+  SDL_Texture* floorText = nullptr;
+  if (remainingLevels == 1) {
+    floorText = this->renderText("Last floor...", MAIN_MENU_FONT, textColor);
+  } else {
+    char floorMessage[64];
+    sprintf(floorMessage, "%d floors remain...", remainingLevels);
+    floorText = this->renderText(floorMessage, MAIN_MENU_FONT, textColor);
+  }
+  if (!floorText) return;
+  int texW, texH;
+  // center text
+  SDL_QueryTexture(floorText, nullptr, nullptr, &texW, &texH);
+  SDL_Rect dstText = {
+    (this->width - texW) / 2,
+    (this->height - texH) / 2,
+    texW,
+    texH
+  };
+  this->clearScreen();
+  // draw the text
+  SDL_RenderCopy(this->renderer, floorText, nullptr, &dstText);
+  // render the whole thing
+  SDL_RenderPresent(this->renderer);
+  // wait for 3 seconds
+  SDL_Delay(3000);
+  // free the texture
+  SDL_DestroyTexture(floorText);
+}
+
 void Renderer::renderGame(Room* currentRoom, Player* player) {
   // Clear the screen
   this->clearScreen();
@@ -558,6 +632,81 @@ void Renderer::renderHealthBar(int x, int y, int w, int h, int hp, int maxHp) {
   }
 }
 
+void Renderer::renderGameOver() {
+  SDL_Color textColor = {255, 255, 255, 255}; // white
+  SDL_Color promptColor = {180, 180, 180, 255}; // light gray
+  // Create the texts to display
+  SDL_Texture* defeatText =
+    this->renderText("You lost, too bad! Do you wish to try again?",
+                     MAIN_MENU_FONT, textColor);
+  SDL_Texture* promptText = this->renderText(
+      "(Press Enter to go back to the main menu, or ESC to exit)",
+      SUBTITLE_FONT, promptColor);
+  if (!defeatText || !promptText) return;
+  int texW, texH;
+  // center text
+  SDL_QueryTexture(defeatText, nullptr, nullptr, &texW, &texH);
+  SDL_Rect dstDefeat = {
+    (this->width - texW) / 2,
+    (this->height - texH) / 2 - 30,  // slightly above center
+    texW,
+    texH
+  };
+  SDL_QueryTexture(promptText, nullptr, nullptr, &texW, &texH);
+  SDL_Rect dstPrompt = {
+    (this->width - texW) / 2,
+    (this->height - texH) / 2 + 30,  // slightly below center
+    texW,
+    texH
+  };
+  this->clearScreen();
+  // draw the texts
+  SDL_RenderCopy(this->renderer, defeatText, nullptr, &dstDefeat);
+  SDL_RenderCopy(this->renderer, promptText, nullptr, &dstPrompt);
+  // render the whole thing
+  SDL_RenderPresent(this->renderer);
+  // free the textures
+  SDL_DestroyTexture(defeatText);
+  SDL_DestroyTexture(promptText);
+}
+
+void Renderer::renderVictory() {
+  SDL_Color textColor = {255, 255, 255, 255}; // white
+  SDL_Color promptColor = {180, 180, 180, 255}; // light gray
+  SDL_Texture* victoryText =
+    this->renderText("Lucky you, you managed to escape!", MAIN_MENU_FONT,
+                     textColor);
+  SDL_Texture* promptText = this->renderText(
+    "(Press Enter to go back to the main menu, or ESC to exit)",
+    SUBTITLE_FONT, promptColor);
+  if (!victoryText || !promptText) return;
+  int texW, texH;
+  // center text
+  SDL_QueryTexture(victoryText, nullptr, nullptr, &texW, &texH);
+  SDL_Rect dstVictory = {
+    (this->width - texW) / 2,
+    (this->height - texH) / 2 - 30,  // slightly above center
+    texW,
+    texH
+  };
+  SDL_QueryTexture(promptText, nullptr, nullptr, &texW, &texH);
+  SDL_Rect dstPrompt = {
+    (this->width - texW) / 2,
+    (this->height - texH) / 2 + 30,  // slightly below center
+    texW,
+    texH
+  };
+  this->clearScreen();
+  // draw the texts
+  SDL_RenderCopy(this->renderer, victoryText, nullptr, &dstVictory);
+  SDL_RenderCopy(this->renderer, promptText, nullptr, &dstPrompt);
+  // render the whole thing
+  SDL_RenderPresent(this->renderer);
+  // free the textures
+  SDL_DestroyTexture(victoryText);
+  SDL_DestroyTexture(promptText);
+}
+
 void Renderer::storeMenuItemBounds(MainMenuButtonID id, const SDL_Rect& bounds) {
   menuItemBounds[id] = bounds;
 }
@@ -568,4 +717,40 @@ const SDL_Rect& Renderer::getMenuItemBounds(MainMenuButtonID id) const {
 
 void Renderer::storeCombatItemBounds(CombatMenuButtonID id, const SDL_Rect& bounds) {
   combatItemBounds[id] = bounds;
+}
+
+void Renderer::showPauseMenu() {
+    SDL_Color textColor = {255, 255, 255, 255}; // Blanco
+    SDL_Color bgColor = {0, 0, 0, 200}; // Fondo semitransparente
+    //SDL_Color highlightColor = {200, 200, 0, 255}; // Amarillo para resaltar
+    // Dibuja fondo semitransparente
+    SDL_Rect bgRect = {this->width / 4, this->height / 4, this->width / 2, this->height / 2};
+    SDL_SetRenderDrawBlendMode(this->renderer, SDL_BLENDMODE_BLEND);
+    SDL_SetRenderDrawColor(this->renderer, bgColor.r, bgColor.g, bgColor.b, bgColor.a);
+    SDL_RenderFillRect(this->renderer, &bgRect);
+    // Título
+    SDL_Texture* title = this->renderText("PAUSE", MAIN_MENU_FONT, textColor);
+    int texW, texH;
+    SDL_QueryTexture(title, nullptr, nullptr, &texW, &texH);
+    SDL_Rect dstTitle = {this->width / 2 - texW / 2, this->height / 4 + 40, texW, texH};
+    // Botón Continuar
+    SDL_Texture* btnContinue = this->renderText("Continue", MAIN_MENU_FONT, textColor);
+    SDL_QueryTexture(btnContinue, nullptr, nullptr, &texW, &texH);
+    SDL_Rect dstContinue = {this->width / 2 - texW / 2, this->height / 4 + 120, texW, texH};
+    // Botón Salir al menú principal
+    SDL_Texture* btnExit = this->renderText("Exit to main menu", MAIN_MENU_FONT, textColor);
+    SDL_QueryTexture(btnExit, nullptr, nullptr, &texW, &texH);
+    SDL_Rect dstExit = {this->width / 2 - texW / 2, this->height / 4 + 200, texW, texH};
+    // Guardar bounds para input
+    storeMenuItemBounds(MENU_ITEM_NG, dstContinue); // Reutilizamos IDs existentes
+    storeMenuItemBounds(MENU_ITEM_EXIT, dstExit);
+    // Renderizar
+    SDL_RenderCopy(this->renderer, title, nullptr, &dstTitle);
+    SDL_RenderCopy(this->renderer, btnContinue, nullptr, &dstContinue);
+    SDL_RenderCopy(this->renderer, btnExit, nullptr, &dstExit);
+    SDL_RenderPresent(this->renderer);
+    SDL_DestroyTexture(title);
+    SDL_DestroyTexture(btnContinue);
+    SDL_DestroyTexture(btnExit);
+    SDL_SetRenderDrawBlendMode(this->renderer, SDL_BLENDMODE_NONE);
 }

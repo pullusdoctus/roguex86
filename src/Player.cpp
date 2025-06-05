@@ -1,4 +1,5 @@
 #include <Player.hpp>
+#include <Item.hpp>
 
 #include <Macros.h>
 
@@ -13,4 +14,19 @@ Player::Player(SDL_Renderer* renderer, const std::string& spritePath,
 }
 
 Player::~Player() {
+}
+
+void Player::addItem(const Item& item) {
+    inventory.push_back(item);
+}
+
+bool Player::useHealthPotion() {
+    for (auto it = inventory.begin(); it != inventory.end(); ++it) {
+        if (it->type == ItemType::HEALTH_POTION) {
+            this->hp = std::min(this->hp + it->value, this->maxHp);
+            inventory.erase(it);
+            return true;
+        }
+    }
+    return false;
 }

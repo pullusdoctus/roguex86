@@ -78,16 +78,19 @@ class Renderer {
     void showDifficulty(int currentDifficulty);
     // Displays the instructions screen
     void showInstructions();
-    // TODO: draws the loading screen
-    void showLoadingScreen();
+    void showLoadingScreen(bool newGame, int remainingLevels);
+    void showInitialLoad();
+    void showNewFloorLoad(int remainingLevels);
     void renderGame(Room* currentRoom, Player* player);
     void renderRoom(Room* room);
     void renderPlayer(Room* room, Player* player);
-    // TODO: draw the pause menu when prompted in-game
+    // Draws the pause menu with 'Continuar' and 'Salir al menú principal' buttons
     void showPauseMenu();
     void clearScreen();
     void renderCombat(Player* player, Enemy* enemy, int hoveredCommand);
     void renderHealthBar(int x, int y, int w, int h, int hp, int maxHp);
+    void renderGameOver();
+    void renderVictory();
 
     void storeMenuItemBounds(MainMenuButtonID id, const SDL_Rect& bounds);
     const SDL_Rect& getMenuItemBounds(MainMenuButtonID id) const;
