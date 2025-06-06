@@ -35,7 +35,6 @@ Engine::Engine() : newGame(true) {
       this->remainingLevels = 7;
       break;
   }
-  this->newGame = true;
 }
 
 Engine::~Engine() {
@@ -123,6 +122,25 @@ void Engine::runGame(bool& quit) {
   }
 }
 
+void Engine::resetGame() {
+  this->newGame = true;
+  this->justMovedRooms = false;
+  switch (this->difficulty) {
+    case EASY:
+      this->remainingLevels = 3;
+      break;
+    case MEDIUM:
+      this->remainingLevels = 5;
+      break;
+    case HARD:
+      this->remainingLevels = 7;
+      break;
+  }
+  delete this->currentFloor;
+  this->currentFloor = new Level;
+}
+
+
 void Engine::startCombat(bool& quit) {
   (void)quit;
   CombatMenuButtonID combatCommand = ATTACK;
@@ -168,8 +186,10 @@ void Engine::gameOver(bool& quit) {
   this->renderer->renderGameOver();
   while (this->gameState == GAME_OVER && !quit) {
     this->inputHandler->processEvents();
-    if (this->inputHandler->keyPressed(ENTER))
+    if (this->inputHandler->keyPressed(ENTER)) {
       this->gameState = MAIN_MENU;
+      this->resetGame();  // para que el juego se reinicie bien
+    }
     if (this->inputHandler->keyPressed(ESC)) {
       quit = true;
     }
@@ -180,8 +200,10 @@ void Engine::victory(bool& quit) {
   this->renderer->renderVictory();
   while (this->gameState == VICTORY && !quit) {
     this->inputHandler->processEvents();
-    if (this->inputHandler->keyPressed(ENTER))
+    if (this->inputHandler->keyPressed(ENTER)){
       this->gameState = MAIN_MENU;
+      this->resetGame();  // para que el juego se reinicie bien
+    }
     if (this->inputHandler->keyPressed(ESC)) {
       quit = true;
     }
@@ -594,6 +616,7 @@ void Engine::handlePauseMenuInput(bool& quit) {
         else if (this->inputHandler->isPointInExitButton(mouse, this->renderer)) {
             this->gameState = MAIN_MENU;
             quit = false; // No salir del juego, solo volver al menú principal
+            this->resetGame();  // para que el juego se reinicie bien
         }
     }
 }

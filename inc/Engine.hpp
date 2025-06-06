@@ -57,6 +57,7 @@ class Engine {
     void startCombat(bool& quit);
     void gameOver(bool& quit);
     void victory(bool& quit);
+    void resetGame();
 
     void handleMainMenuInput(bool& quit);
     void handleOptionsMenuInput();
