@@ -194,8 +194,9 @@ bool Level::placeStaircase() {
       }
     }
   }
-  // if the staircase wasn't placed, try to place it in the middle of the room
-  return tryPlaceStaircase(roomWidth / 2, roomHeight / 2);
+  // if the staircase wasn't placed, try to place it in a corner of the room
+  auto [x, y] = this->chooseCorner();
+  return this->tryPlaceStaircase(x, y);
 }
 
 bool Level::isValidStaircasePosition(int x, int y, int width, int height) {
@@ -224,6 +225,21 @@ bool Level::tryPlaceStaircase(int x, int y) {
   this->staircaseX = x;
   this->staircaseY = y;
   return true;
+}
+
+std::pair<int, int> Level::chooseCorner() {
+  int corner = rand_between(0, 3);
+  switch (corner) {
+    case 0:  // top left
+      return {2, 2};
+    case 1:  // top right
+      return {this->staircaseRoom->getWidth() - 2, 2};
+    case 2:  // bottom left
+      return {2, this->staircaseRoom->getHeight() - 2};
+    case 3:  // bottom right
+      return {this->staircaseRoom->getWidth() - 2,
+        this->staircaseRoom->getHeight() - 2};
+  }
 }
 
 std::pair<int, int> Level::getStaircasePosition() {
