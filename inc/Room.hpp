@@ -3,6 +3,7 @@
 #include <SDL.h>
 #include <Player.hpp>
 #include <vector>
+#include <Chest.hpp>
 
 enum TileType {
     FLOOR,
@@ -31,6 +32,8 @@ private:
     SDL_Texture* floorTile;
     SDL_Texture* wallTile;
     SDL_Texture* staircaseTile;
+    std::vector<Chest> chests;
+    SDL_Texture* chestTile;
     // Generate random room dimensions
     void generateDimensions();
     // Initialize the tile grid
@@ -49,6 +52,7 @@ public:
 
     // Generate a new room
     void generate(SDL_Renderer* renderer);
+    void generateChests(SDL_Renderer* renderer); // NUEVO
 
     // Get room dimensions
     int getWidth() const { return this->width; }
@@ -56,6 +60,7 @@ public:
     SDL_Texture* getFloor() { return this->floorTile; }
     SDL_Texture* getWall() { return this->wallTile; }
     SDL_Texture* getStaircase() { return this->staircaseTile; }
+    SDL_Texture* getChestTile();
     // Get tile at position
     TileType getTileAt(int x, int y) const;
 
@@ -72,4 +77,9 @@ public:
 
     // Calculate room position in the window
     SDL_Point calculateRoomPosition() const;
+
+    void addChest(const Chest& chest);
+    std::vector<Chest>& getChests();
+    void loadChestTexture(SDL_Renderer* renderer);
+    Chest* getChestAt(int x, int y);
 };

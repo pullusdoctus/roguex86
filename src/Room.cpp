@@ -1,4 +1,5 @@
 #include <Room.hpp>
+#include <Chest.hpp>
 
 #include <chrono>
 #include <SDL_image.h>
@@ -36,7 +37,7 @@ Direction operator++(Direction& dir, int) {
 }
 
 Room::Room() : width(0), height(0), floorTile(nullptr), wallTile(nullptr),
-  north(nullptr), south(nullptr), west(nullptr), east(nullptr) {
+  chestTile(nullptr), north(nullptr), south(nullptr), west(nullptr), east(nullptr) {
 }
 
 Room::~Room() {
@@ -45,6 +46,9 @@ Room::~Room() {
   }
   if (this->wallTile) {
     SDL_DestroyTexture(this->wallTile);
+  }
+  if (this->chestTile) {
+    SDL_DestroyTexture(this->chestTile);
   }
 }
 
@@ -95,7 +99,15 @@ bool Room::loadTextures(SDL_Renderer* renderer) {
   }
   this->staircaseTile = SDL_CreateTextureFromSurface(renderer, stairSurface);
   SDL_FreeSurface(stairSurface);
-  return this->floorTile && this->wallTile && this->staircaseTile;
+  // Load chest texture
+  SDL_Surface* chestSurface = IMG_Load("rsc/img/tiles/chest_tile.png");
+  if (!chestSurface) {
+    std::cerr << "Failed to load chest texture: " << SDL_GetError() << std::endl;
+    return false;
+  }
+  this->chestTile = SDL_CreateTextureFromSurface(renderer, chestSurface);
+  SDL_FreeSurface(chestSurface);
+  return this->floorTile && this->wallTile && this->staircaseTile && this->chestTile;
 }
 
 void Room::generate(SDL_Renderer* renderer) {
@@ -107,6 +119,39 @@ void Room::generate(SDL_Renderer* renderer) {
   if (!this->loadTextures(renderer)) {
     std::cerr << "Failed to load room textures" << std::endl;
   }
+  this->generateChests(renderer);
+}
+
+void Room::generateChests(SDL_Renderer* renderer) {
+    // Cargar textura de cofre
+    this->loadChestTexture(renderer);
+    // Probabilidad de poner 0, 1 o 2 cofres por habitación
+    int numChests = rand() % 3; // 0, 1 o 2
+    for (int i = 0; i < numChests; ++i) {
+        int cx, cy;
+        // Buscar una posición válida (tile FLOOR, sin cofre encima)
+        int tries = 0;
+        do {
+            cx = 1 + rand() % (this->width - 2);
+            cy = 1 + rand() % (this->height - 2);
+            ++tries;
+        } while ((this->getTileAt(cx, cy) != FLOOR || getChestAt(cx, cy)) && tries < 20);
+        if (tries < 20) {
+            // Crear item aleatorio
+            Item item;
+            if (rand() % 2 == 0) {
+                item.type = ItemType::HEALTH_POTION;
+                item.name = "Health Potion";
+                item.value = 1 + rand() % 10; // 1-10
+            } else {
+                item.type = ItemType::BOMB;
+                item.name = "Bomb";
+                item.value = 10 + rand() % 11; // 10-20
+            }
+            Chest chest{cx, cy, item, false};
+            this->addChest(chest);
+        }
+    }
 }
 
 TileType Room::getTileAt(int x, int y) const {
@@ -184,4 +229,36 @@ SDL_Point Room::calculateRoomPosition() const {
   int offsetX = (WINDOW_WIDTH - width * TILE_SIZE) / 2;
   int offsetY = (WINDOW_HEIGHT - height * TILE_SIZE) / 2;
   return {offsetX, offsetY};
+}
+
+void Room::addChest(const Chest& chest) {
+    chests.push_back(chest);
+}
+
+std::vector<Chest>& Room::getChests() {
+    return chests;
+}
+
+SDL_Texture* Room::getChestTile() {
+    return chestTile;
+}
+
+void Room::loadChestTexture(SDL_Renderer* renderer) {
+    SDL_Surface* chestSurface = IMG_Load("rsc/img/tiles/chest_tile.png");
+    if (!chestSurface) {
+        std::cerr << "Failed to load chest texture: " << SDL_GetError() << std::endl;
+        chestTile = nullptr;
+        return;
+    }
+    chestTile = SDL_CreateTextureFromSurface(renderer, chestSurface);
+    SDL_FreeSurface(chestSurface);
+}
+
+Chest* Room::getChestAt(int x, int y) {
+    for (auto& chest : chests) {
+        if (chest.x == x && chest.y == y && !chest.opened) {
+            return &chest;
+        }
+    }
+    return nullptr;
 }

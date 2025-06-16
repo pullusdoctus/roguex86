@@ -212,6 +212,22 @@ void Renderer::renderRoom(Room* room) {
       SDL_RenderCopy(this->renderer, tile, NULL, &dst);
     }
   }
+  // Renderizar cofres
+  for (const auto& chest : room->getChests()) {
+    if (!chest.opened) {
+      SDL_Point roomPos = room->calculateRoomPosition();
+      SDL_Rect dst = {
+        roomPos.x + chest.x * TILE_SIZE,
+        roomPos.y + chest.y * TILE_SIZE,
+        TILE_SIZE,
+        TILE_SIZE
+      };
+      SDL_Texture* chestTile = room->getChestTile();
+      if (chestTile) {
+        SDL_RenderCopy(this->renderer, chestTile, NULL, &dst);
+      }
+    }
+  }
 }
 
 void Renderer::renderPlayer(Room* room, Player* player) {
@@ -589,12 +605,53 @@ void Renderer::renderCombat(Player* player, Enemy* enemy, int hoveredCommand) {
   int startX = this->width - totalTextWidth - margin;
   // draw commands
   for (int i = 0, x = startX; i < labelCount; ++i) {
-    SDL_Rect dst = {x, commandY, commandWidths[i], texH};
-    SDL_RenderCopy(this->renderer, commandOptions[i], nullptr, &dst);
-    storeCombatItemBounds(static_cast<CombatMenuButtonID>(ATTACK + i), dst);
-    x += commandWidths[i] + spacing;
-  }
-  SDL_RenderPresent(this->renderer);
+        SDL_Rect dst = {x, commandY, commandWidths[i], texH};
+        SDL_RenderCopy(this->renderer, commandOptions[i], nullptr, &dst);
+        storeCombatItemBounds(static_cast<CombatMenuButtonID>(ATTACK + i), dst);
+        x += commandWidths[i] + spacing;
+    }
+    // Mostrar mensajes de combate en la esquina inferior izquierda, de 2 en 2
+    int msgX = margin;
+    int msgW = this->width / 2;
+    int msgH = 0;
+    int lineHeight = 0;
+    int msgYBase = this->height - margin - 16; // margen inferior
+    SDL_Color msgColor = {255, 255, 255, 255};
+    SDL_Color bgColor = {0, 0, 0, 180};
+    std::vector<SDL_Texture*> msgTextures;
+    std::vector<SDL_Rect> msgRects;
+    int msgsToShow = std::min((int)combatMessages.size(), 2);
+    int totalHeight = 0;
+    // Calcular altura total
+    for (int i = (int)combatMessages.size() - msgsToShow; i < (int)combatMessages.size(); ++i) {
+        SDL_Texture* msgTex = renderText(combatMessages[i].c_str(), MAIN_MENU_FONT, msgColor);
+        if (msgTex) {
+            int mw, mh;
+            SDL_QueryTexture(msgTex, nullptr, nullptr, &mw, &mh);
+            msgRects.push_back({msgX + 16, 0, mw, mh}); // y se ajusta después
+            msgTextures.push_back(msgTex);
+            totalHeight += mh + 8;
+            lineHeight = mh;
+        }
+    }
+    // Fondo
+    if (!msgTextures.empty()) {
+        int bgY = msgYBase - totalHeight;
+        SDL_Rect bgRect = {msgX, bgY, msgW, totalHeight + 8};
+        SDL_SetRenderDrawBlendMode(this->renderer, SDL_BLENDMODE_BLEND);
+        SDL_SetRenderDrawColor(this->renderer, bgColor.r, bgColor.g, bgColor.b, bgColor.a);
+        SDL_RenderFillRect(this->renderer, &bgRect);
+        SDL_SetRenderDrawBlendMode(this->renderer, SDL_BLENDMODE_NONE);
+        // Mensajes
+        int y = bgY + 4;
+        for (size_t i = 0; i < msgTextures.size(); ++i) {
+            msgRects[i].y = y;
+            SDL_RenderCopy(this->renderer, msgTextures[i], nullptr, &msgRects[i]);
+            y += msgRects[i].h + 8;
+            SDL_DestroyTexture(msgTextures[i]);
+        }
+    }
+    SDL_RenderPresent(this->renderer);
   // cleanup
   SDL_DestroyTexture(commandTitle);
   for (int i = 0; i < labelCount; ++i) {
@@ -753,4 +810,19 @@ void Renderer::showPauseMenu() {
     SDL_DestroyTexture(btnContinue);
     SDL_DestroyTexture(btnExit);
     SDL_SetRenderDrawBlendMode(this->renderer, SDL_BLENDMODE_NONE);
+}
+
+void Renderer::addCombatMessage(const std::string& msg) {
+    if (combatMessages.size() >= maxCombatMessages) {
+        combatMessages.pop_front();
+    }
+    combatMessages.push_back(msg);
+}
+
+void Renderer::clearCombatMessages() {
+    combatMessages.clear();
+}
+
+const std::deque<std::string>& Renderer::getCombatMessages() const {
+    return combatMessages;
 }

@@ -435,6 +435,16 @@ void Engine::handleInGame() {
       } while (true);
     }
   }
+  // Interacción con cofres
+  Chest* chest = currentRoom->getChestAt(this->player->x, this->player->y);
+  if (chest && !chest->opened) {
+    // Dar objeto al jugador
+    this->player->addItem(chest->item);
+    chest->opened = true;
+    // Mostrar mensaje en inglés
+    std::string msg = "You opened a chest and found: " + chest->item.name + "!";
+    this->renderer->addCombatMessage(msg);
+  }
   this->renderer->renderGame(currentRoom, this->player);
 }
 
@@ -446,16 +456,17 @@ void Engine::handleCombat(CombatMenuButtonID& command, Enemy* enemy, Player* pla
   } else if (this->inputHandler->keyPressed(D_KEY)) {
     ++command;
   } else if (this->inputHandler->keyPressed(ENTER)) {    
+    std::string msg;
     switch (command) {
       case ATTACK: {
-        std::cout << "ATTACK" << std::endl;
         int damage = this->player->calculateDamage(
           this->player->getAttack(), enemy->getDefense());
-        std::cout << "Damage dealt: " << damage << std::endl;
+        std::string msg = "You attack! Damage dealt: " + std::to_string(damage);
+        this->renderer->addCombatMessage(msg);
         if (enemy) {
           enemy->takeDamage(damage);
           if (enemy->getHealth() <= 0) {
-            std::cout << "Enemy defeated!" << std::endl;
+            this->renderer->addCombatMessage("Enemy defeated!");
             this->gameState = IN_GAME;
             return;
           }
@@ -463,8 +474,7 @@ void Engine::handleCombat(CombatMenuButtonID& command, Enemy* enemy, Player* pla
         break;
       }
       case OBJECTS:
-        std::cout << "OBJECTS" << std::endl;
-        // Mostrar inventario visual y permitir usar poción o bomba
+        // Show inventory and allow using potion or bomb
         {
             InventoryUI invUI;
             int idx = invUI.show(this->renderer->getSDLRenderer(), player->inventory);
@@ -472,35 +482,39 @@ void Engine::handleCombat(CombatMenuButtonID& command, Enemy* enemy, Player* pla
                 Item& item = player->inventory[idx];
                 if (item.type == ItemType::HEALTH_POTION) {
                     player->hp = std::min(player->hp + item.value, player->maxHp);
-                    std::cout << "¡Poción de salud usada! Vida actual: " << player->getHealth() << std::endl;
+                    std::string msg = "Health potion used! Current HP: " + std::to_string(player->getHealth());
+                    this->renderer->addCombatMessage(msg);
                     player->inventory.erase(player->inventory.begin() + idx);
                 } else if (item.type == ItemType::BOMB) {
                     if (enemy) {
                         enemy->takeDamage(item.value);
-                        std::cout << "¡Bomba usada! Daño al enemigo: " << item.value << std::endl;
+                        std::string msg = "Bomb used! Enemy takes " + std::to_string(item.value) + " damage.";
+                        this->renderer->addCombatMessage(msg);
                         player->inventory.erase(player->inventory.begin() + idx);
                         if (enemy->getHealth() <= 0) {
-                            std::cout << "Enemy defeated by bomb!" << std::endl;
+                            this->renderer->addCombatMessage("Enemy defeated by bomb!");
                             this->gameState = IN_GAME;
                             return;
                         }
                     }
                 }
             } else {
-                std::cout << "Inventario cancelado o vacío." << std::endl;
+                this->renderer->addCombatMessage("Inventory cancelled or empty.");
             }
         }
         break;
       case DEFEND:
         player->defend();
+        this->renderer->addCombatMessage("You defend!");
         break;
       case RUN: {
         std::mt19937 rng(std::random_device{}());
         std::uniform_int_distribution<int> dist(1, 100);
         int chance = dist(rng);
         if (chance <= 20) {
-          // run failed
+          this->renderer->addCombatMessage("You failed to run away!");
         } else {
+          this->renderer->addCombatMessage("You escaped!");
           this->gameState = IN_GAME;
           return;
         }
@@ -508,17 +522,17 @@ void Engine::handleCombat(CombatMenuButtonID& command, Enemy* enemy, Player* pla
       }
     }
 
-    // Acción del enemigo después de que el jugador actuó
+    // Enemy action after player
     if (enemy && enemy->getHealth() > 0) {
       int enemyDamage = enemy->calculateDamage(
         enemy->getAttack(), player->getDefense());
-      std::cout << "Enemy damage: " << enemyDamage << std::endl;
+      std::string msg = "Enemy attacks! You take " + std::to_string(enemyDamage) + " damage.";
+      this->renderer->addCombatMessage(msg);
       player->takeDamage(enemyDamage);
       this->player->isDefending = false;
-      std::cout << "Enemy attacks! Player HP: " << this->player->getHealth() << "\n";
       if (player->getHealth() <= 0) {
-        std::cout << "Player defeated!" << std::endl;
-        this->gameState = GAME_OVER;  // o lo que corresponda
+        this->renderer->addCombatMessage("You were defeated!");
+        this->gameState = GAME_OVER;
         return;
       }
     }
@@ -529,11 +543,11 @@ void Engine::initializePlayer() {
   this->player = new Player(this->renderer->getSDLRenderer(),
                             PLAYER_SPRITE, 0, 0, PLAYER_HEALTH);
     if (this->player) {
-        // Por ahora, al crear el jugador, le damos 2 pociones de salud y 1 bomba
+        // Al crear el jugador, le damos 2 pociones de salud y 1 bomba
         Item potion;
         potion.type = ItemType::HEALTH_POTION;
         potion.name = "Health Potion";
-        potion.value = 20;
+        potion.value = 10; // máximo 10 HP
         this->player->addItem(potion);
         this->player->addItem(potion);
         Item bomb;

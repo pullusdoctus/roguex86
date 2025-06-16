@@ -8,6 +8,7 @@
 #include <SDL_ttf.h>
 #include <string>
 #include <vector>
+#include <deque>
 
 enum MainMenuButtonID {
   MENU_ITEM_OPTIONS = 0,
@@ -49,6 +50,8 @@ class Renderer {
     int height;
     std::vector<SDL_Rect> menuItemBounds;
     std::vector<SDL_Rect> combatItemBounds;
+    std::deque<std::string> combatMessages;
+    const size_t maxCombatMessages = 4;
 
   public:
     Renderer();
@@ -95,4 +98,8 @@ class Renderer {
     void storeMenuItemBounds(MainMenuButtonID id, const SDL_Rect& bounds);
     const SDL_Rect& getMenuItemBounds(MainMenuButtonID id) const;
     void storeCombatItemBounds(CombatMenuButtonID id, const SDL_Rect& bounds);
+
+    void addCombatMessage(const std::string& msg);
+    void clearCombatMessages();
+    const std::deque<std::string>& getCombatMessages() const;
 };
