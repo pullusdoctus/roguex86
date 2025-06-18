@@ -292,7 +292,7 @@ void Renderer::showMainMenu() {
 void Renderer::showOptions() {
   SDL_Color textColor = {255, 255, 255, 255}; // White color
   // Create the texts to display
-  SDL_Texture* title = this->renderText("Options", MAIN_MENU_FONT, textColor);
+  SDL_Texture* title = this->renderText("Options", TITLE_FONT, textColor);
   SDL_Texture* option1 = this->renderText("volume", MAIN_MENU_FONT, textColor);
   SDL_Texture* option2 = this->renderText("difficulty", MAIN_MENU_FONT, textColor);
   SDL_Texture* option3 = this->renderText("instructions", MAIN_MENU_FONT, textColor);
@@ -342,7 +342,7 @@ void Renderer::showOptions() {
 void Renderer::showChangeVolume(int currentVolume) {
   SDL_Color textColor = {255, 255, 255, 255}; // White color
   // Create the texts to display
-  SDL_Texture* title = this->renderText("Volume", MAIN_MENU_FONT, textColor);
+  SDL_Texture* title = this->renderText("Volume", TITLE_FONT, textColor);
   // Create current volume text with the percentage
   char volumeText[20];
   sprintf(volumeText, "Current Volume: %d%%", currentVolume);
@@ -407,7 +407,7 @@ void Renderer::showDifficulty(int currentDifficulty) {
   // Yellow color for highlighting
   SDL_Color highlightColor = {255, 255, 0, 255};
   // Create the texts to display
-  SDL_Texture* title = this->renderText("Difficulty", MAIN_MENU_FONT,
+  SDL_Texture* title = this->renderText("Difficulty", TITLE_FONT,
                                         textColor);
   // Render the appropriately colored difficulty texts
   SDL_Texture* option1 = this->renderText("easy", MAIN_MENU_FONT,
@@ -466,7 +466,7 @@ void Renderer::showInstructions() {
   SDL_Color textColor = {255, 255, 255, 255}; // White color
   SDL_Color subtitleColor = {200, 200, 0, 255}; // Yellow color for subtitles
   // Create the texts to display
-  SDL_Texture* title = this->renderText("Instructions", MAIN_MENU_FONT,
+  SDL_Texture* title = this->renderText("Instructions", TITLE_FONT,
                                         textColor);
   SDL_Texture* description = this->renderText("There are two game phases:"
                                               " exploration and combat",
