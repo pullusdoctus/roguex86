@@ -37,11 +37,14 @@ enum EnemyTypes {
   BAT,
   SCORPION
 };
+
+class AudioMixer;
+
 class Engine {
   private:
     Renderer* renderer;
     InputHandler* inputHandler;
-    // AudioMixer* mixer;
+    AudioMixer* mixer;
     Player* player;
     bool justMovedRooms;
     // vector<Enemy*> enemies;

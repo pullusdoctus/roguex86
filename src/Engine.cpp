@@ -1,4 +1,5 @@
 #include <Engine.hpp>
+#include <AudioMixer.hpp>
 
 #include <Bat.hpp>
 #include <chrono>
@@ -13,11 +14,11 @@
 #include <InventoryUI.hpp>
 
 Engine::Engine() : newGame(true) {
+  this->mixer = new AudioMixer;
   this->renderer = new Renderer;
   this->inputHandler = new InputHandler;
   this->player = nullptr;
   this->justMovedRooms = false;
-  //this->player->loadSprite(this->renderer->getSDLRenderer(), PLAYER_SPRITE);
   this->currentFloor = new Level;
   this->gameState = MAIN_MENU;
   if (!readSettings()) {
@@ -38,6 +39,7 @@ Engine::Engine() : newGame(true) {
 }
 
 Engine::~Engine() {
+  delete this->mixer;
   delete this->renderer;
   delete this->inputHandler;
   delete this->player;
@@ -50,6 +52,8 @@ int Engine::run() {
     std::cout << "Failed to initialize SDL.\n";
     return EXIT_FAILURE;
   }
+  this->mixer->loadMusic();
+  this->mixer->playMusic(this->gameState);
   bool quit = false;
   while (!quit) {
     if (this->inputHandler->processEvents()) {
@@ -59,6 +63,7 @@ int Engine::run() {
     switch (this->gameState) {
       case MAIN_MENU:
         this->renderer->showMainMenu();
+        this->mixer->playMusic(this->gameState);
         this->handleMainMenuInput(quit);
         break;
       case OPTIONS_MENU:
@@ -111,6 +116,7 @@ void Engine::runGame(bool& quit) {
     this->newGame = false;
     this->renderer->showLoadingScreen(this->newGame, this->remainingLevels);
   }
+  this->mixer->playMusic(this->gameState);
   while (this->gameState == IN_GAME && !quit) {
     if (this->inputHandler->processEvents()) {
       quit = true;
@@ -143,6 +149,7 @@ void Engine::resetGame() {
 
 void Engine::startCombat(bool& quit) {
   (void)quit;
+  this->mixer->playMusic(this->gameState);
   CombatMenuButtonID combatCommand = ATTACK;
   // TODO: change this to randomly choose one of the three enemies
   std::mt19937 rng(std::random_device{}());
@@ -184,6 +191,7 @@ void Engine::startCombat(bool& quit) {
 
 void Engine::gameOver(bool& quit) {
   this->renderer->renderGameOver();
+  this->mixer->stopMusic();
   while (this->gameState == GAME_OVER && !quit) {
     this->inputHandler->processEvents();
     if (this->inputHandler->keyPressed(ENTER)) {
@@ -198,6 +206,7 @@ void Engine::gameOver(bool& quit) {
 
 void Engine::victory(bool& quit) {
   this->renderer->renderVictory();
+  this->mixer->stopMusic();
   while (this->gameState == VICTORY && !quit) {
     this->inputHandler->processEvents();
     if (this->inputHandler->keyPressed(ENTER)){
@@ -275,6 +284,7 @@ void Engine::handleVolumeMenuInput() {
                                                        this->renderer)) {
       isDragging = true;
       this->calculateVolumeFromSliderPosition(mouse.x);
+      this->mixer->setVolume(this->volume);
     }
   }
   // End dragging when mouse button is released
@@ -285,6 +295,7 @@ void Engine::handleVolumeMenuInput() {
   if (isDragging && this->inputHandler->mouseDown()) {
     if (this->inputHandler->isXPositionInSlider(mouse.x, this->renderer)) {
       this->calculateVolumeFromSliderPosition(mouse.x);
+      this->mixer->setVolume(this->volume);
     }
   }
 }

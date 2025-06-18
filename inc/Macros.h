@@ -8,12 +8,14 @@
 #define WINDOW_HEIGHT 720
 // Font definitions
 #define FONT_PATH "./rsc/assets/fonts/PressStart2P-Regular.ttf"
-#define MENU_BG_PATH "./rsc/img/menu-bg.png"  // TODO: render
 #define FONT_SIZE_TITLE 48
 #define FONT_SIZE_MAIN_MENU 24
 #define FONT_SIZE_SUBTITLE 20
 #define FONT_SIZE_INSTRUCTION 18
 #define FONT_SIZE_PAUSE_MENU 12
+// Music definitions
+#define MUSIC_PATH "./rsc/sfx/st"
+#define MENU_BG_PATH "./rsc/img/menu-bg.png"  // TODO: render
 // Sprite definitions
 #define PLAYER_SPRITE "./rsc/img/sprites/player.png"
 #define SLIME_SPRITE "./rsc/img/sprites/slime.png"
