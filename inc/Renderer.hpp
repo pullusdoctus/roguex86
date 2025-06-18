@@ -35,7 +35,8 @@ CombatMenuButtonID& operator++(CombatMenuButtonID& cmd);
 CombatMenuButtonID& operator--(CombatMenuButtonID& cmd);
 
 enum FontIDs {
-  MAIN_MENU_FONT = 0,
+  TITLE_FONT = 0,
+  MAIN_MENU_FONT,
   SUBTITLE_FONT,
   INSTRUCTION_FONT,
   PAUSE_MENU_FONT

@@ -69,6 +69,7 @@ void Renderer::clean() {
 }
 
 void Renderer::loadFonts() {
+  this->fonts.push_back(loadFont(FONT_PATH, FONT_SIZE_TITLE));
   this->fonts.push_back(loadFont(FONT_PATH, FONT_SIZE_MAIN_MENU));
   this->fonts.push_back(loadFont(FONT_PATH, FONT_SIZE_SUBTITLE));
   this->fonts.push_back(loadFont(FONT_PATH, FONT_SIZE_INSTRUCTION));
@@ -243,13 +244,14 @@ void Renderer::renderPlayer(Room* room, Player* player) {
 
 void Renderer::showMainMenu() {
   SDL_Color textColor = {255, 255, 255, 255}; // White color
+  SDL_Color red = {255, 0, 0, 255};
   // Create the texts to display
-  SDL_Texture* title = this->renderText("roguex86", MAIN_MENU_FONT, textColor);
+  SDL_Texture* title = this->renderText("roguex86", TITLE_FONT, textColor);
   SDL_Texture* option1 = this->renderText("options", MAIN_MENU_FONT,
                                           textColor);
   SDL_Texture* option2 = this->renderText("new game", MAIN_MENU_FONT,
                                           textColor);
-  SDL_Texture* option3 = this->renderText("EXIT", MAIN_MENU_FONT, textColor);
+  SDL_Texture* option3 = this->renderText("EXIT", MAIN_MENU_FONT, red);
   // Exit if any of them fails
   if (!title || !option1 || !option2 || !option3) return;
   int texW, texH;
