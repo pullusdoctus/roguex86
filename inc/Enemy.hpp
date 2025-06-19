@@ -11,6 +11,8 @@ class Enemy : public Character {
   public:
     Enemy(SDL_Renderer* renderer, const std::string& spritePath,
           int startX, int startY, int hp);
-    
+          
+    virtual int specialAbility() = 0;
+    virtual ~Enemy();
 
 };

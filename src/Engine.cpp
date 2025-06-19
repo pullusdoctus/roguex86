@@ -462,6 +462,24 @@ void Engine::handleInGame() {
 void Engine::handleCombat(CombatMenuButtonID& command, Enemy* enemy, Player* player) {
   this->inputHandler->processEvents();
   
+  if (player->paralysisCount != 0)
+  {
+    --player->paralysisCount;
+    this->renderer->addCombatMessage("You are paralyzed and cannot act!");
+    return;
+  }
+  if (player->poisonCount != 0)
+  {
+    --player->poisonCount;
+    player->takeDamage(2); // Take 2 damage from poison
+    this->renderer->addCombatMessage("You are poisoned! You take 2 damage.");
+    if (player->getHealth() <= 0) {
+      this->renderer->addCombatMessage("You were defeated by poison!");
+      this->gameState = GAME_OVER;
+      return;
+    }
+  }
+  
   if (this->inputHandler->keyPressed(A_KEY)) {
     --command;
   } else if (this->inputHandler->keyPressed(D_KEY)) {
@@ -535,8 +553,25 @@ void Engine::handleCombat(CombatMenuButtonID& command, Enemy* enemy, Player* pla
 
     // Enemy action after player
     if (enemy && enemy->getHealth() > 0) {
+      std::mt19937 rng(std::random_device{}());
+      std::uniform_int_distribution<int> dist(1, 100);
+      int chance = dist(rng);
+      if (chance <= 20)
+      {
+        if (enemy->specialAbility() < 2) {
+          player->isParalyzed = true;
+          player->paralysisCount = 2; // Paralysis lasts for 2 turns
+          this->renderer->addCombatMessage("Enemy uses a special ability! You are paralyzed for 2 turns.");
+        }
+        else {
+          player->isPoisoned = true;
+          player->poisonCount = 2; // Poison lasts for 2 turns
+          this->renderer->addCombatMessage("Enemy uses a special ability! You are poisoned for 2 turns.");
+        }
+      }
+
       int enemyDamage = enemy->calculateDamage(
-        enemy->getAttack(), player->getDefense());
+      enemy->getAttack(), player->getDefense());
       std::string msg = "Enemy attacks! You take " + std::to_string(enemyDamage) + " damage.";
       this->renderer->addCombatMessage(msg);
       player->takeDamage(enemyDamage);

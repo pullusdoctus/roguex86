@@ -240,6 +240,8 @@ std::pair<int, int> Level::chooseCorner() {
       return {this->staircaseRoom->getWidth() - 2,
         this->staircaseRoom->getHeight() - 2};
   }
+  // Fallback return to silence compiler warning
+  return {2, 2};
 }
 
 std::pair<int, int> Level::getStaircasePosition() {

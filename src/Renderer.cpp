@@ -615,8 +615,6 @@ void Renderer::renderCombat(Player* player, Enemy* enemy, int hoveredCommand) {
     // Mostrar mensajes de combate en la esquina inferior izquierda, de 2 en 2
     int msgX = margin;
     int msgW = this->width / 2;
-    int msgH = 0;
-    int lineHeight = 0;
     int msgYBase = this->height - margin - 16; // margen inferior
     SDL_Color msgColor = {255, 255, 255, 255};
     SDL_Color bgColor = {0, 0, 0, 180};
@@ -633,7 +631,6 @@ void Renderer::renderCombat(Player* player, Enemy* enemy, int hoveredCommand) {
             msgRects.push_back({msgX + 16, 0, mw, mh}); // y se ajusta después
             msgTextures.push_back(msgTex);
             totalHeight += mh + 8;
-            lineHeight = mh;
         }
     }
     // Fondo
